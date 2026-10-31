@@ -10,7 +10,9 @@ Dati letti dalla schermata di sistema:
 - Android 14 dichiarato, da verificare sulla radio
 - Schermo: il sistema indica 1280x720 (il proprietario ricordava 1280x800), da verificare
 - Bluetooth 5.0: non è noto se il modulo è interno o separato
-- App di proiezione preinstallata: Zlink, da lasciare intatta come riserva finché la nostra non funziona bene
+- App di proiezione preinstallata: Zlink (`com.zjinnova.zlink`), da lasciare intatta come riserva finché la nostra non funziona bene. Dopo un arresto forzato torna a collegarsi.
+- Il menu impostazioni è del produttore e non mostra quelle di Android. Nessun root né Self-ADB rilevato.
+- Test video dell'app superato: H.264 a 480p e 720p
 
 ## Cosa cambia rispetto all'originale
 | Cosa | Dove | Perché |
@@ -20,6 +22,7 @@ Dati letti dalla schermata di sistema:
 | Versione 1.0 (`versionCode` 1) | `app/build.gradle.kts` | Numerazione nostra, 1.0, 1.1... |
 | "Controlla aggiornamenti" punta a questo repository | `utils/UpdateChecker.kt` | Altrimenti proporrebbe l'APK ufficiale, con altro ID e altra firma. |
 | Avviso di versione modificata e link ai sorgenti | `main/AboutFragment.kt` | Richiesto dalla licenza AGPL-3.0. |
+| Pulsanti per aprire pagina di Zlink, impostazioni Android, info dispositivo e opzioni sviluppatore | `main/SettingsFragment.kt`, `layout/dialog_oem_app_manager.xml`, stringhe `oem_app_open_*` | La radio nasconde le impostazioni di Android: servono per disattivare Zlink e per ADB. |
 | Action `Release APK` | `.github/workflows/release-apk.yml` | Compila, firma e pubblica. |
 
 Quando si fa il merge dall'originale, in `app/build.gradle.kts` vanno tenuti i nostri `applicationId`, `versionCode` e `versionName`.
@@ -52,7 +55,8 @@ Si compila solo su GitHub, non serve nulla sul PC.
 ## Stato del lavoro
 - [x] Fork, Actions abilitate, branch `riconnessione-stabile`
 - [x] Identità, firma e Action di Release (v1.0)
-- [ ] Prova della modalità Native sulla radio
+- [x] v1.0.1: pulsanti per aprire le schermate di sistema nascoste
+- [ ] Prova della modalità Native sulla radio: si collega secondo il proprietario, ma da verificare che Android Auto passi dalla nostra app e non da Zlink
 - [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni
 - [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili)
 - [ ] Disattivare Zlink, solo dopo che la nostra app funziona bene

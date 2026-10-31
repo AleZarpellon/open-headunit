@@ -1489,6 +1489,11 @@
     <string name="oem_app_commands_title">Prepared ADB / Shell Commands</string>
     <string name="oem_app_action_success">Command executed successfully.</string>
     <string name="oem_app_action_failed">Execution failed: %s</string>
+    <string name="oem_app_open_page">Open the %1$s app page</string>
+    <string name="oem_app_open_android_settings">Open Android settings</string>
+    <string name="oem_app_open_device_info">Open device info (build number)</string>
+    <string name="oem_app_open_developer_settings">Open developer options</string>
+    <string name="oem_app_open_screen_failed">This head unit does not allow opening that screen.</string>
     <string name="copy_to_clipboard">Copy</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="audio_settings_reconnect">Audio settings saved. Reconnect Android Auto to apply them.</string>

@@ -1280,6 +1280,11 @@
     <string name="oem_app_commands_title">Comandi ADB / Shell preparati</string>
     <string name="oem_app_action_success">Comando eseguito con successo.</string>
     <string name="oem_app_action_failed">Esecuzione non riuscita: %s</string>
+    <string name="oem_app_open_page">Apri la pagina dell\'app %1$s</string>
+    <string name="oem_app_open_android_settings">Apri impostazioni Android</string>
+    <string name="oem_app_open_device_info">Apri info dispositivo (numero build)</string>
+    <string name="oem_app_open_developer_settings">Apri opzioni sviluppatore</string>
+    <string name="oem_app_open_screen_failed">Questa autoradio non permette di aprire questa schermata.</string>
     <string name="copy_to_clipboard">Copia</string>
     <string name="copied_to_clipboard">Copiato negli appunti</string>
     <string name="stage_armed">In attesa del tuo telefono</string>

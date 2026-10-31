@@ -5124,6 +5124,15 @@ class SettingsFragment : Fragment() {
         private var zbtProbeResult: String? = null
     }
 
+    /** A head unit can hide or refuse any system screen, so a refusal is reported and nothing more. */
+    private fun openSystemScreen(intent: Intent) {
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), R.string.oem_app_open_screen_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun showOemAppManagementDialog() {
         val context = requireContext()
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_oem_app_manager, null)
@@ -5133,6 +5142,17 @@ class SettingsFragment : Fragment() {
         val progressLoading = dialogView.findViewById<ProgressBar>(R.id.progressLoading)
         val appsContainer = dialogView.findViewById<LinearLayout>(R.id.appsContainer)
         val tvEmptyState = dialogView.findViewById<TextView>(R.id.tvEmptyState)
+        val btnOpenOemAppPage = dialogView.findViewById<MaterialButton>(R.id.btnOpenOemAppPage)
+
+        dialogView.findViewById<MaterialButton>(R.id.btnOpenAndroidSettings).setOnClickListener {
+            openSystemScreen(Intent(SystemSettings.ACTION_SETTINGS))
+        }
+        dialogView.findViewById<MaterialButton>(R.id.btnOpenDeviceInfo).setOnClickListener {
+            openSystemScreen(Intent(SystemSettings.ACTION_DEVICE_INFO_SETTINGS))
+        }
+        dialogView.findViewById<MaterialButton>(R.id.btnOpenDeveloperSettings).setOnClickListener {
+            openSystemScreen(Intent(SystemSettings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
+        }
 
         val currentAutoKill = pendingAutoKillOemApps ?: settings.autoKillOemApps
         switchAutoKill.isChecked = currentAutoKill
@@ -5174,6 +5194,17 @@ class SettingsFragment : Fragment() {
                 OemAppManager.ExecutionBackend.NONE -> {
                     tvBackendStatus.setText(R.string.oem_app_backend_none)
                     tvBackendStatus.setTextColor(ContextCompat.getColor(context, R.color.material_orange_700))
+                }
+            }
+
+            val conflicting = statuses.firstOrNull { it.isInstalled && it.installedPackage != null }
+            btnOpenOemAppPage.visibility = if (conflicting != null) View.VISIBLE else View.GONE
+            if (conflicting != null) {
+                btnOpenOemAppPage.text = getString(R.string.oem_app_open_page, conflicting.target.displayName)
+                btnOpenOemAppPage.setOnClickListener {
+                    openSystemScreen(Intent(SystemSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.parse("package:${conflicting.installedPackage}")
+                    })
                 }
             }
 

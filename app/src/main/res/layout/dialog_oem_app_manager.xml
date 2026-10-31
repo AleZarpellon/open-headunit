@@ -32,6 +32,35 @@
             android:textStyle="bold"
             android:textColor="?android:attr/textColorPrimary" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenOemAppPage"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenAndroidSettings"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/oem_app_open_android_settings" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenDeviceInfo"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/oem_app_open_device_info" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenDeveloperSettings"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/oem_app_open_developer_settings" />
+
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switchAutoKill"
             android:layout_width="match_parent"
