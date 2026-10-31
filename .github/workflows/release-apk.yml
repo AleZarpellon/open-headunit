@@ -73,6 +73,8 @@ jobs:
           echo "$badging" | grep -E "^(package|application-label):"
           echo "$badging" | grep -q "^package: name='io.github.alezarpellon.headunitcustom'" \
             || { echo "Unexpected application id" >&2; exit 1; }
+          echo "$badging" | grep -q "^application-label:'HeadUnit Revived Custom'" \
+            || { echo "Unexpected application label" >&2; exit 1; }
           echo "path=$apk" >> "$GITHUB_OUTPUT"
 
       - name: Upload APK

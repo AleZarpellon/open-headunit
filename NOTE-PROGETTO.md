@@ -16,7 +16,7 @@ Dati letti dalla schermata di sistema:
 | Cosa | Dove | Perché |
 |---|---|---|
 | `applicationId` = `io.github.alezarpellon.headunitcustom` | `app/build.gradle.kts`, `app/src/main/res/xml/shortcuts.xml` | Non entrare in conflitto con altre app. Il `namespace` del codice resta `com.andrerinas.openheadunit`. |
-| Nome app "HeadUnit Revived Custom" | `values/strings.xml`, `values-it/strings.xml` | Nome scelto dal proprietario. Le altre lingue mostrano ancora il nome originale. |
+| Nome app "HeadUnit Revived Custom" (stringhe `title` e `app_name`; l'icona usa `title`) | `values/strings.xml`, `values-it/strings.xml` | Nome scelto dal proprietario. Le altre lingue e i testi interni dell'app dicono ancora "Open Headunit". |
 | Versione 1.0 (`versionCode` 1) | `app/build.gradle.kts` | Numerazione nostra, 1.0, 1.1... |
 | "Controlla aggiornamenti" punta a questo repository | `utils/UpdateChecker.kt` | Altrimenti proporrebbe l'APK ufficiale, con altro ID e altra firma. |
 | Avviso di versione modificata e link ai sorgenti | `main/AboutFragment.kt` | Richiesto dalla licenza AGPL-3.0. |
