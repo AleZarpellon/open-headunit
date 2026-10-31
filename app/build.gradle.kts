@@ -89,15 +89,16 @@ android {
     }
 
     defaultConfig {
-        // Keep the original Play Store application id so the app stays the same listing (reviews,
+        // Fork HeadUnit Revived Custom: own application id, so it installs next to any other app.
+        // Upstream kept the original Play Store application id so the app stays the same listing (reviews,
         // installs, testers) and existing users just get a normal update. Only the display name
         // changed to Open Headunit. The code package and namespace stay openheadunit, so the
         // applicationId deliberately differs from the namespace, like com.google.talk for Hangouts.
-        applicationId = "com.andrerinas.headunitrevived"
+        applicationId = "io.github.alezarpellon.headunitcustom"
         minSdk = 16
         targetSdk = 36
-        versionCode = 121
-        versionName = "4.0.0-beta1"
+        versionCode = 1
+        versionName = "1.0"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

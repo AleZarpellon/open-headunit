@@ -83,8 +83,8 @@ data class UpdateInfo(
 
 object UpdateChecker {
     private const val TAG = "UpdateChecker"
-    private const val GITHUB_RELEASES_API = "https://api.github.com/repos/andreknieriem/open-headunit/releases?per_page=5"
-    const val GITHUB_RELEASES_WEB = "https://github.com/andreknieriem/open-headunit/releases"
+    private const val GITHUB_RELEASES_API = "https://api.github.com/repos/AleZarpellon/open-headunit/releases?per_page=5"
+    const val GITHUB_RELEASES_WEB = "https://github.com/AleZarpellon/open-headunit/releases"
 
     fun isPlayStoreInstallation(context: Context): Boolean {
         if (BuildConfig.FLAVOR == "playstore") return true
