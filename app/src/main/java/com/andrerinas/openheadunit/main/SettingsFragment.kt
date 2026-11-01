@@ -5163,7 +5163,7 @@ class SettingsFragment : Fragment() {
         try {
             startActivity(intent)
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), R.string.oem_app_open_screen_failed, Toast.LENGTH_LONG).show()
+            ToastUtils.showToast(requireContext(), getString(R.string.oem_app_open_screen_failed), Toast.LENGTH_LONG, force = true)
         }
     }
 

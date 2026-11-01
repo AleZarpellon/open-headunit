@@ -3,17 +3,22 @@ package com.andrerinas.openheadunit.utils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class DisconnectLogTest {
 
     @get:Rule
     val folder = TemporaryFolder()
+
+    private var now = 1_000L
+
+    @Before
+    fun fixClock() {
+        DisconnectLog.clock = { now }
+    }
 
     @Test
     fun `durations read in plain units`() {

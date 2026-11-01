@@ -23,6 +23,8 @@ object DisconnectLog {
     private const val MAX_LINES = 1000
     private const val SHOWN_LINES = 300
 
+    internal var clock: () -> Long = { SystemClock.elapsedRealtime() }
+
     private var file: File? = null
     private var startedAt = 0L
     private var connectedAt = 0L
@@ -38,7 +40,7 @@ object DisconnectLog {
     @Synchronized
     internal fun initFile(target: File) {
         file = target
-        startedAt = SystemClock.elapsedRealtime()
+        startedAt = clock()
         connectedAt = 0L
         droppedAt = 0L
         attempts = 0
@@ -61,7 +63,7 @@ object DisconnectLog {
 
     @Synchronized
     fun noteConnected() {
-        val now = SystemClock.elapsedRealtime()
+        val now = clock()
         if (connectedAt != 0L) return
         val rounds = roundsText(attempts)
         when {
@@ -77,7 +79,7 @@ object DisconnectLog {
     /** Ignored when no session was up, so failed attempts do not read as drops. */
     @Synchronized
     fun noteDisconnected(reason: String, unexpected: Boolean) {
-        val now = SystemClock.elapsedRealtime()
+        val now = clock()
         if (connectedAt == 0L) return
         val detail = cause?.takeIf { unexpected }?.let { ": $it" } ?: ""
         append("CADUTO", "$reason$detail, sessione durata ${formatDuration(now - connectedAt)}")
