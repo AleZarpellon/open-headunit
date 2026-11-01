@@ -80,7 +80,7 @@ Sulla strada verso casa del 2026-11-01 il proprietario ha notato piccole perdite
 - [x] Prova della modalità Native sulla radio con Zlink disattivato e Wi-Fi acceso a mano: Android Auto, vivavoce e musica Bluetooth funzionano. Non parte da solo.
 - [x] Avvio automatico: funziona con "Non dormire" alla prima prova (vedi sezione La radio)
 - [x] Prova alla prima accensione del giorno dopo, senza toccare nulla: Android Auto parte da solo, Zlink resta disattivato, Wi-Fi acceso, vivavoce e musica funzionano
-- [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni (Release v1.1 pubblicata, da provare sulla radio)
+- [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni. Prove da fermo del 2026-11-01 con il registro: Wi-Fi spento 10 s e arresto forzato di Android Auto tornano da soli in 6-12 s con 0 tentativi (il telefono torna senza che la radio bussi, quindi il guardiano non è ancora stato messo alla prova); "Interrompi connessione" registrata come manuale, nessun ritorno da solo secondo il proprietario; chiamata sulle casse senza cadute, ma probabilmente dopo il ritorno. Da fare: Wi-Fi del telefono spento per 3 minuti con una chiamata in mezzo, per vedere tentativi maggiori di 0 e il vivavoce mentre la radio bussa.
 - [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili)
 - [ ] Disattivare Zlink, solo dopo che la nostra app funziona bene
 - [ ] Fase 2: mappa di tutte le modifiche possibili
