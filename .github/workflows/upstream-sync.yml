@@ -1,0 +1,148 @@
+name: Controlla originale
+
+# Once a week, looks for a new stable release of the original project (betas are ignored) and
+# opens a Pull Request with it. Conflicts show on the Pull Request itself.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag dell'originale da provare (vuoto = ultima versione stabile)
+        required: false
+      dry_run:
+        description: Solo prova, non apre la Pull Request
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  BASE_BRANCH: riconnessione-stabile
+  UPSTREAM: https://github.com/andreknieriem/open-headunit.git
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASE_BRANCH }}
+          fetch-depth: 0
+
+      - name: Find what is new
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          # Asked of the original only: this repository's own tags look like versions too.
+          tag="$INPUT_TAG"
+          if [ -z "$tag" ]; then
+            tag=$(git ls-remote --tags --refs "$UPSTREAM" \
+              | sed 's|.*refs/tags/||' \
+              | grep -E '^v\.?[0-9]+\.[0-9]+\.[0-9]+$' \
+              | sort -V | tail -n 1)
+          fi
+          test -n "$tag" || { echo "No stable release found" >&2; exit 1; }
+          git fetch "$UPSTREAM" "refs/tags/$tag:refs/tags/upstream/$tag"
+          branch="aggiornamento/$tag"
+          if git merge-base --is-ancestor "upstream/$tag" HEAD; then
+            echo "Il nostro codice contiene già $tag: niente da fare." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code origin "refs/heads/$branch" > /dev/null; then
+            echo "La proposta per $tag esiste già." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Try the merge
+        if: steps.find.outputs.new == 'true'
+        id: merge
+        env:
+          TAG: ${{ steps.find.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git merge --no-edit "upstream/$TAG"; then
+            echo "clean=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "clean=false" >> "$GITHUB_OUTPUT"
+            git diff --name-only --diff-filter=U > conflicts.txt
+            cat conflicts.txt
+            git merge --abort
+          fi
+
+      - name: Set up JDK 21
+        if: steps.merge.outputs.clean == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        if: steps.merge.outputs.clean == 'true'
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
+
+      - name: Install pinned NDK, CMake and build tools
+        if: steps.merge.outputs.clean == 'true'
+        run: |
+          for attempt in 1 2 3; do
+            sdkmanager "ndk;29.0.14206865" "cmake;3.22.1" "build-tools;36.0.0" && exit 0
+            sleep 15
+          done
+          exit 1
+
+      - name: Set up Gradle
+        if: steps.merge.outputs.clean == 'true'
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run unit tests on the merge
+        if: steps.merge.outputs.clean == 'true'
+        id: tests
+        continue-on-error: true
+        run: ./gradlew :app:testGithubDebugUnitTest --stacktrace
+
+      - name: Open the Pull Request
+        if: steps.find.outputs.new == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.find.outputs.tag }}
+          BRANCH: ${{ steps.find.outputs.branch }}
+          CLEAN: ${{ steps.merge.outputs.clean }}
+          TESTS: ${{ steps.tests.outcome }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          {
+            echo "Nuova versione stabile dell'originale: **$TAG**."
+            echo
+            if [ "$CLEAN" != "true" ]; then
+              echo "**Ci sono conflitti**: non si può unire da telefono. File coinvolti:"
+              sed 's/^/- /' conflicts.txt
+            elif [ "$TESTS" = "success" ]; then
+              echo "Si unisce senza conflitti e i controlli automatici sono passati."
+            else
+              echo "Si unisce senza conflitti, ma **i controlli automatici non sono passati**. Non unire senza averli guardati."
+            fi
+            echo
+            echo "Dopo l'unione: tieni i nostri \`applicationId\`, \`versionCode\` e \`versionName\`, poi pubblica una nuova versione. Istruzioni in \`NOTE-PROGETTO.md\`."
+          } > body.md
+          cat body.md | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Solo prova: nessuna Pull Request aperta."
+            exit 0
+          fi
+          # Refused when the original changed a workflow file: this token may not touch those.
+          # The run then fails and GitHub sends its failure e-mail.
+          git push origin "refs/tags/upstream/$TAG^{commit}:refs/heads/$BRANCH"
+          gh pr create --base "$BASE_BRANCH" --head "$BRANCH" \
+            --title "Aggiornamento dall'originale: $TAG" --body-file body.md

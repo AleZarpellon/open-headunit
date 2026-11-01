@@ -1489,6 +1489,12 @@
     <string name="oem_app_commands_title">Prepared ADB / Shell Commands</string>
     <string name="oem_app_action_success">Command executed successfully.</string>
     <string name="oem_app_action_failed">Execution failed: %s</string>
+    <string name="update_offer_message">Version %1$s is available. Install it now?</string>
+    <string name="update_install">Install</string>
+    <string name="update_skip">Skip this version</string>
+    <string name="update_later">Later</string>
+    <string name="update_downloading">Downloading the update…</string>
+    <string name="update_download_failed">Could not download the update. Opening the release page.</string>
     <string name="disconnect_log">Disconnection history</string>
     <string name="disconnect_log_description">When the connection dropped, why, and how long it took to come back.</string>
     <string name="disconnect_log_empty">Nothing recorded yet.</string>

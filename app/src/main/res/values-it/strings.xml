@@ -162,6 +162,12 @@
     <string name="start_log_capture_in_silent">Impossibile avviare la registrazione: il livello di log è impostato su Silenzioso</string>
     <string name="stop_log_capture">Interrompi acquisizione log</string>
     <string name="stop_log_capture_description">Registrazione in corso… tocca per interrompere.</string>
+    <string name="update_offer_message">È disponibile la versione %1$s. Vuoi installarla ora?</string>
+    <string name="update_install">Installa</string>
+    <string name="update_skip">Salta questa versione</string>
+    <string name="update_later">Più tardi</string>
+    <string name="update_downloading">Scaricamento dell\'aggiornamento…</string>
+    <string name="update_download_failed">Impossibile scaricare l\'aggiornamento. Apro la pagina della versione.</string>
     <string name="disconnect_log">Registro disconnessioni</string>
     <string name="disconnect_log_description">Quando è caduto il collegamento, perché e dopo quanto è tornato.</string>
     <string name="disconnect_log_empty">Ancora nessuna registrazione.</string>

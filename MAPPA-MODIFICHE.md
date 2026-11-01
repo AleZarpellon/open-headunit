@@ -55,7 +55,7 @@ Le impostazioni si trovano nell'app, in Impostazioni. Molte sono nella scheda **
 | Regolazione volumi | Musica, navigatore e sistema separati, da 0 a 200% | Impostazione | B | B | Utile se il navigatore è troppo basso | 2 |
 | Audio AAC | Audio compresso, usa meno banda | Impostazione | B | M | Da provare per i blocchi | 2 |
 | Coda audio | Quanti pezzi di audio tenere in attesa | Impostazione | B | M | Solo dopo la prova in viaggio | 3 |
-| Moltiplicatore di latenza | Memoria audio | Impostazione, predefinito 8x (il massimo) | – | – | Controlla solo che sia a 8x | Controllo |
+| Moltiplicatore di latenza | Memoria audio | Impostazione, sulla tua radio è 16x | – | – | Già alto, lascialo così | Fatto |
 | Flussi audio separati | Musica e navigatore su uscite diverse | Impostazione | B | M | Non serve con un solo impianto | 3 |
 | Uscita AAudio | Audio a bassa latenza, sperimentale | Impostazione | B | M | Può gracchiare | 3 |
 | Microfono | Sorgente e riduzione rumore per l'Assistente | Impostazione | B | B | Se l'Assistente non ti capisce | 2 |
@@ -88,7 +88,7 @@ Le impostazioni si trovano nell'app, in Impostazioni. Molte sono nella scheda **
 
 | Modifica | Cosa fa | Dove | Diff. | Rischio | Per la tua radio | Priorità |
 |---|---|---|---|---|---|---|
-| Avvisa solo se si accende la radio | Avvio dell'app allo schermo acceso | Impostazione | B | M | Non serve con "Non dormire" | 3 |
+| Avvio allo schermo acceso | Apre l'app ogni volta che lo schermo si accende | Impostazione | B | M | Non serve con "Non dormire" | 3 |
 | Comandi esterni (Tasker, ADB) | Controlla l'app da altre app | Impostazione | M | M | Non hai altre app lì | 3 |
 | Disattivare Zlink in modo stabile | Disattivazione via ADB se Zlink torna | Da PC | M | B | Solo se torna: oggi è rimasto spento | Di riserva |
 | Launcher auto | L'app diventa la Home | Impostazione | B | B | Provato: la radio lo ignora | No |
@@ -105,7 +105,7 @@ Le impostazioni si trovano nell'app, in Impostazioni. Molte sono nella scheda **
 | ID veicolo | Identificativo interno | Impostazione | B | A | Cambiarlo azzera le preferenze di Android Auto | No |
 | Blocco video disattivato | Finge una velocità bassa per permettere i video | Impostazione, attiva di serie | B | A | Per sicurezza guardare video guidando va evitato: valuta di spegnerla | Controllo |
 
-## Le 8 da cui partirei
+## Le 7 da cui partirei
 
 Tutte già nelle impostazioni, nessuna richiede una nuova versione:
 1. Scala interfaccia e dimensione dei pulsanti
@@ -115,4 +115,3 @@ Tutte già nelle impostazioni, nessuna richiede una nuova versione:
 5. Riprendi la musica alla riconnessione
 6. Comandi al volante
 7. Backup delle impostazioni
-8. Controllo del moltiplicatore di latenza a 8x

@@ -56,6 +56,9 @@ import android.os.SystemClock
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
 import com.andrerinas.openheadunit.utils.SystemUI
 import com.andrerinas.openheadunit.utils.ToastUtils
+import com.andrerinas.openheadunit.utils.UpdateChecker
+import com.andrerinas.openheadunit.utils.UpdateInfo
+import com.andrerinas.openheadunit.utils.UpdateInstaller
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -233,6 +236,7 @@ class MainActivity : BaseActivity() {
         // Start main service immediately to handle connections and wireless server
         val serviceIntent = Intent(this, AapService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
+        offerUpdateOnStart()
 
         setFullscreen()
 
@@ -1298,6 +1302,48 @@ class MainActivity : BaseActivity() {
         val appSettings = Settings(this)
         SystemUI.apply(window, root, appSettings.fullscreenMode)
         SystemUI.keepLegacyBarsHidden(window, appSettings.fullscreenMode)
+    }
+
+    /** Offers a newer release once per process, on this screen and never over a running session. */
+    private fun offerUpdateOnStart() {
+        if (!UpdateInstaller.claimStartupCheck()) return
+        lifecycleScope.launch {
+            delay(UpdateInstaller.STARTUP_CHECK_DELAY_MS)
+            val info = UpdateChecker.check(this@MainActivity).getOrNull() ?: return@launch
+            if (!UpdateInstaller.shouldOffer(info, UpdateInstaller.skippedVersion(this@MainActivity))) return@launch
+            var offered = false
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                while (App.provide(this@MainActivity).commManager.isConnected) delay(30_000)
+                if (!offered) {
+                    offered = true
+                    showUpdateOffer(info)
+                }
+            }
+        }
+    }
+
+    private fun showUpdateOffer(info: UpdateInfo) {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.DarkAlertDialog)
+            .setTitle(R.string.update_available_title)
+            .setMessage(getString(R.string.update_offer_message, info.latestVersionName))
+            .setPositiveButton(R.string.update_install) { _, _ -> installUpdate(info) }
+            .setNeutralButton(R.string.update_skip) { _, _ ->
+                UpdateInstaller.skipVersion(this, info.latestVersionName)
+            }
+            .setNegativeButton(R.string.update_later, null)
+            .show()
+    }
+
+    private fun installUpdate(info: UpdateInfo) {
+        val url = info.apkUrl ?: return
+        ToastUtils.showToast(this, getString(R.string.update_downloading), Toast.LENGTH_LONG, force = true)
+        lifecycleScope.launch {
+            val apk = UpdateInstaller.download(this@MainActivity, url)
+            if (apk == null || !UpdateInstaller.install(this@MainActivity, apk)) {
+                ToastUtils.showToast(this@MainActivity, getString(R.string.update_download_failed), Toast.LENGTH_LONG, force = true)
+                UpdateChecker.openGitHubReleases(this@MainActivity, info.releaseUrl)
+            }
+        }
     }
 
     override fun onResume() {

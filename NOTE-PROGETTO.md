@@ -29,7 +29,9 @@ Dati letti dalla schermata di sistema:
 |---|---|---|
 | `applicationId` = `io.github.alezarpellon.headunitcustom` | `app/build.gradle.kts`, `app/src/main/res/xml/shortcuts.xml` | Non entrare in conflitto con altre app. Il `namespace` del codice resta `com.andrerinas.openheadunit`. |
 | Nome app "HeadUnit Revived Custom" (stringhe `title` e `app_name`; l'icona usa `title`) | `values/strings.xml`, `values-it/strings.xml` | Nome scelto dal proprietario. Le altre lingue e i testi interni dell'app dicono ancora "Open Headunit". |
-| Versione 1.1 (`versionCode` 3) | `app/build.gradle.kts` | Numerazione nostra, 1.0, 1.1... |
+| Versione 1.2 (`versionCode` 4) | `app/build.gradle.kts` | Numerazione nostra, 1.0, 1.1... |
+| Controllo aggiornamenti all'avvio con Installa, Salta e Più tardi; permesso `REQUEST_INSTALL_PACKAGES` | `utils/UpdateInstaller.kt`, `main/MainActivity.kt`, `AndroidManifest.xml`, stringhe `update_*` | Richiesto dal proprietario. Non si è ancora visto all'opera: serve una versione successiva alla 1.2. |
+| Action settimanale `Controlla originale` | `.github/workflows/upstream-sync.yml` | Propone le nuove versioni stabili dell'originale, ignorando le beta. |
 | Guardiano di riconnessione: attese 2, 5, 10, 30 s e poi 30 s, controllo ogni 30 s che qualcosa stia ancora cercando il telefono | `nativeaa/ReconnectBackoffPolicy.kt`, `NativeAaHandshakeManager.kt` | Il proprietario vuole che la radio non si arrenda mai, salvo disconnessione manuale. |
 | Si bussa anche dopo un ByeBye del telefono | `nativeaa/SessionEndGroupPolicy.kt` | Era il principale punto di resa. Conseguenza: chiudere Android Auto dal telefono lo fa richiamare. |
 | Schermata non aperta due volte: si riprova dopo 30 s invece di fermarsi | `aap/AapService.kt` (`END_AND_HOLD`), `holdNextWake` | Stesso motivo. |
@@ -57,6 +59,15 @@ Si compila solo su GitHub, non serve nulla sul PC.
 
 La Action esegue i test prima di compilare. `HctRetainedChannelTest` ("actual FSM bridge keeps its bound...") è fallito una volta e passato alla ripetizione, senza modifiche: sembra instabile. In quel caso si rilancia con `gh run rerun <id> --failed`.
 
+## Come si aggiorna dall'originale
+Ogni lunedì la Action `Controlla originale` cerca l'ultima versione stabile dell'originale. Si può lanciare anche a mano da GitHub, scheda Actions. Dato che il nostro codice è già oltre la 4.0.0-beta1, la prima proposta arriverà con la 4.0.0 stabile. Il branch predefinito del repository è `riconnessione-stabile`, perché le Action programmate partono solo da quello: se si cambia branch di lavoro, va aggiornato anche `BASE_BRANCH` nella Action.
+
+- **Dal telefono, app GitHub:** Pull requests → apri la proposta → leggi il testo. Se dice che si unisce senza conflitti e i controlli sono passati, tocca **Merge**.
+- **Dopo l'unione:** alza la versione e pubblica una Release, come sopra.
+- **Se ci sono conflitti:** la proposta elenca i file. Non si risolvono dal telefono: apri una sessione con Claude e fagli leggere questo file.
+- **Se arriva un'e-mail di Action fallita:** spesso l'originale ha cambiato un file in `.github/workflows`, che il token automatico non può toccare. La proposta va creata a mano o con Claude.
+- GitHub sospende le Action programmate dopo 60 giorni senza attività nel repository: se succede, riattivala dalla scheda Actions.
+
 ## Chiave di firma
 - Sta nei GitHub Secrets: `HEADUNIT_KEYSTORE_BASE64`, `HEADUNIT_KEYSTORE_PASSWORD`, `HEADUNIT_KEY_PASSWORD`. Alias: `headunit-revived`.
 - La copia di backup la conserva il proprietario, fuori dal repository. Non va mai caricata qui.
@@ -81,7 +92,7 @@ Sulla strada verso casa del 2026-11-01 il proprietario ha notato piccole perdite
 - [x] Avvio automatico: funziona con "Non dormire" alla prima prova (vedi sezione La radio)
 - [x] Prova alla prima accensione del giorno dopo, senza toccare nulla: Android Auto parte da solo, Zlink resta disattivato, Wi-Fi acceso, vivavoce e musica funzionano
 - [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni. Prove da fermo del 2026-11-01 con il registro: Wi-Fi spento 10 s e arresto forzato di Android Auto tornano da soli in 6-12 s con 0 tentativi (il telefono torna senza che la radio bussi, quindi il guardiano non è ancora stato messo alla prova); "Interrompi connessione" registrata come manuale, nessun ritorno da solo secondo il proprietario; chiamata sulle casse senza cadute, ma probabilmente dopo il ritorno. Salva funziona. Il proprietario dice che la prova con Wi-Fi spento per 3 minuti e chiamata in mezzo funziona, ma la foto del registro manca: tentativi maggiori di 0 e vivavoce mentre la radio bussa restano da confermare. I blocchi tornando a casa erano leggeri e solo sulla musica, senza disconnessioni: al prossimo viaggio confrontare musica scaricata e in streaming e guardare se si ferma anche la mappa.
-- [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili)
+- [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili): scritti nella v1.2, l'avviso è da vedere con la versione successiva. Audio: moltiplicatore di latenza a 16x sulla radio, quindi già alto; prossima prova Audio AAC.
 - [ ] Disattivare Zlink, solo dopo che la nostra app funziona bene
 - [x] Fase 2: mappa di tutte le modifiche possibili, in `MAPPA-MODIFICHE.md`. Il proprietario deve ancora scegliere le voci.
 - [ ] Fase 3: personalizzazioni su branch `personalizzazioni`, con Release separata
