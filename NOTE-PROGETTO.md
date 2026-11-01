@@ -29,7 +29,7 @@ Dati letti dalla schermata di sistema:
 |---|---|---|
 | `applicationId` = `io.github.alezarpellon.headunitcustom` | `app/build.gradle.kts`, `app/src/main/res/xml/shortcuts.xml` | Non entrare in conflitto con altre app. Il `namespace` del codice resta `com.andrerinas.openheadunit`. |
 | Nome app "HeadUnit Revived Custom" (stringhe `title` e `app_name`; l'icona usa `title`) | `values/strings.xml`, `values-it/strings.xml` | Nome scelto dal proprietario. Le altre lingue e i testi interni dell'app dicono ancora "Open Headunit". |
-| Versione 1.2 (`versionCode` 4) | `app/build.gradle.kts` | Numerazione nostra, 1.0, 1.1... |
+| Versione 1.3 (`versionCode` 9) | `app/build.gradle.kts` | Numerazione nostra, 1.0, 1.1... |
 | Controllo aggiornamenti all'avvio con Installa, Salta e Più tardi; permesso `REQUEST_INSTALL_PACKAGES` | `utils/UpdateInstaller.kt`, `main/MainActivity.kt`, `AndroidManifest.xml`, stringhe `update_*` | Richiesto dal proprietario. Non si è ancora visto all'opera: serve una versione successiva alla 1.2. |
 | Action settimanale `Controlla originale` | `.github/workflows/upstream-sync.yml` | Propone le nuove versioni stabili dell'originale, ignorando le beta. |
 | Guardiano di riconnessione: attese 2, 5, 10, 30 s e poi 30 s, controllo ogni 30 s che qualcosa stia ancora cercando il telefono | `nativeaa/ReconnectBackoffPolicy.kt`, `NativeAaHandshakeManager.kt` | Il proprietario vuole che la radio non si arrenda mai, salvo disconnessione manuale. |
@@ -57,7 +57,7 @@ Si compila solo su GitHub, non serve nulla sul PC.
   2. Scrivi le note in italiano in `note-release/vX.Y.md`.
   3. Crea e invia il tag `vX.Y`. L'Action rifiuta il tag se non corrisponde a `versionName`.
 
-La Action esegue i test prima di compilare. `HctRetainedChannelTest` ("actual FSM bridge keeps its bound...") è fallito due volte e passato alla ripetizione, senza modifiche in quella parte: sembra instabile. Sul branch `personalizzazioni` è escluso in `app/build.gradle.kts`; sul branch stabile, finché non si uniscono, si rilancia con `gh run rerun <id> --failed`. La causa non è stata cercata.
+La Action esegue i test prima di compilare. `HctRetainedChannelTest` ("actual FSM bridge keeps its bound...") è fallito due volte e passato alla ripetizione, senza modifiche in quella parte: sembra instabile. È escluso in `app/build.gradle.kts`. La causa non è stata cercata.
 
 ## Come si aggiorna dall'originale
 Ogni lunedì la Action `Controlla originale` cerca l'ultima versione stabile dell'originale. Si può lanciare anche a mano da GitHub, scheda Actions. Dato che il nostro codice è già oltre la 4.0.0-beta1, la prima proposta arriverà con la 4.0.0 stabile. Il branch predefinito del repository è `riconnessione-stabile`, perché le Action programmate partono solo da quello: se si cambia branch di lavoro, va aggiornato anche `BASE_BRANCH` nella Action.
@@ -106,7 +106,7 @@ Sul branch `personalizzazioni`, versione `v1.2-prova1`, non proposta come aggior
 
 Al buio, con la mappa di Waze in modalità notte, la barra resta sulla mappa e sparisce sui widget. La `v1.2-prova2` ridisegna la barra come la scheda di Android Auto, con copertina, colore preso dalla copertina e linea di avanzamento: secondo il proprietario funziona tutto, ma con una copertina chiara il testo bianco si leggeva male. La `v1.2-prova3` mette titolo e artista su una riga, ingrandisce testo e tasti e sceglie testo nero o bianco in base al colore della scheda.
 
-La `v1.2-prova4` aggiunge il tocco su nome e copertina, che invia `KEYCODE_MUSIC`: da verificare se Android Auto apre Spotify. La linea di avanzamento non si può trascinare: il protocollo non ha un comando per spostarsi nel brano e il proprietario ha scartato le alternative con i tasti di avanzamento veloce.
+La `v1.2-prova4` aggiunge il tocco su nome e copertina, che invia `KEYCODE_MUSIC`: sulla radio apre Spotify. Tutto questo è confluito nella v1.3 e il branch `personalizzazioni` è stato unito a `riconnessione-stabile`, che resta l'unico branch di lavoro. La v1.3 serve anche a provare l'avviso di aggiornamento: da confermare. La linea di avanzamento non si può trascinare: il protocollo non ha un comando per spostarsi nel brano e il proprietario ha scartato le alternative con i tasti di avanzamento veloce.
 
 Le versioni stabili successive dovranno avere `versionCode` maggiore di 8, altrimenti non si installano sopra la prova.
 
