@@ -162,6 +162,10 @@
     <string name="start_log_capture_in_silent">Impossibile avviare la registrazione: il livello di log è impostato su Silenzioso</string>
     <string name="stop_log_capture">Interrompi acquisizione log</string>
     <string name="stop_log_capture_description">Registrazione in corso… tocca per interrompere.</string>
+    <string name="disconnect_log">Registro disconnessioni</string>
+    <string name="disconnect_log_description">Quando è caduto il collegamento, perché e dopo quanto è tornato.</string>
+    <string name="disconnect_log_empty">Ancora nessuna registrazione.</string>
+    <string name="disconnect_log_save">Salva</string>
     <string name="export_logs">Esporta log</string>
     <string name="export_logs_description">Salva i log per il debug.</string>
 

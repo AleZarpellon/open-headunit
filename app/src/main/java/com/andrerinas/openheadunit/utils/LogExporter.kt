@@ -367,8 +367,11 @@ object LogExporter {
         val settings = Settings(context)
 
         if (AppLog.logSource == Settings.LogSource.APPLOG_FILE) {
-            return@withContext (AppLog.currentLogFile ?: AppLog.lastLogFile)
+            // AppLog only remembers files of this process: after a restart with the capture off,
+            // the logs are still on disk and it is the disk that has to be asked.
+            return@withContext ((AppLog.currentLogFile ?: AppLog.lastLogFile)
                 ?.takeIf { it.exists() && it.length() > 0 }
+                ?: LogFilesHelper.newestLogFile(LogFilesHelper.resolveLogDirectory(context, settings)))
                 ?.also { appendBanner(it, context) }
         }
 

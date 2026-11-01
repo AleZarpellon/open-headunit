@@ -1489,6 +1489,10 @@
     <string name="oem_app_commands_title">Prepared ADB / Shell Commands</string>
     <string name="oem_app_action_success">Command executed successfully.</string>
     <string name="oem_app_action_failed">Execution failed: %s</string>
+    <string name="disconnect_log">Disconnection history</string>
+    <string name="disconnect_log_description">When the connection dropped, why, and how long it took to come back.</string>
+    <string name="disconnect_log_empty">Nothing recorded yet.</string>
+    <string name="disconnect_log_save">Save</string>
     <string name="oem_app_open_page">Open the %1$s app page</string>
     <string name="oem_app_open_android_settings">Open Android settings</string>
     <string name="oem_app_open_device_info">Open device info (build number)</string>

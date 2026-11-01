@@ -57,6 +57,7 @@ import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.utils.BluetoothAddressSeedPolicy
 import com.andrerinas.openheadunit.utils.CarLauncherManager
 import com.andrerinas.openheadunit.utils.BluetoothHelper
+import com.andrerinas.openheadunit.utils.DisconnectLog
 import com.andrerinas.openheadunit.utils.DummyVpnPolicy
 import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.aap.protocol.messages.NightModeEvent
@@ -103,6 +104,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ModuleRearmPol
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ProjectionQrSnapshot
+import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ReconnectBackoffPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SessionEndGroupPolicy
 import com.andrerinas.openheadunit.connection.wifi.direct.NativeGroupKeepPolicy
 import com.andrerinas.openheadunit.utils.HotspotManager
@@ -351,6 +353,7 @@ class AapService : Service() {
      * service harder for MediaTek's background power saving to kill.
      */
     private var bootWakeLock: PowerManager.WakeLock? = null
+    private var reconnectWakeLock: PowerManager.WakeLock? = null
 
     /**
      * Runtime-registered receiver for MEDIA_BUTTON intents.
@@ -1175,6 +1178,7 @@ class AapService : Service() {
         super.onCreate()
         AppLog.i("AapService creating...")
         instance = this
+        DisconnectLog.init(this)
         // A dark screen is not evidence that the car is on.
         if (ScreenPower.isInteractive(this) != false) AccPowerState.noteOn()
 
@@ -1500,6 +1504,8 @@ class AapService : Service() {
         (wifiLauncherManager.active as? WifiLauncherNative)?.handshakeManager?.projectionQrSnapshot()
 
     private fun onConnected() {
+        DisconnectLog.noteConnected()
+        releaseReconnectWakeLock()
         usbLauncherManager.setSwitchingToProjection(false)
         updateNotification()
         // Whatever the transport, the wake-up loop has nothing left to do. Event driven rather
@@ -1635,10 +1641,10 @@ class AapService : Service() {
                 }
                 ProjectionRaiseDeadlinePolicy.Action.END_AND_HOLD -> {
                     AppLog.e("AapService: the projection screen never came up again, so this session ends " +
-                        "and automatic reconnection waits until something asks for it.")
+                        "and the next wake is held back.")
                     unprojectedEndsInARow++
-                    // A Native re-arm must not wake the phone: that would start the same loop.
-                    sessionEndedByHand = true
+                    // The guardian never gives up, but it spaces these out: an immediate wake
+                    // would only run into the same screen. See the hold in onDisconnected.
                     commManager.disconnect(sendByeBye = true, isUserExit = false, honorKillOnDisconnect = false,
                         reason = CommManager.DisconnectReason.PROJECTION_UNRAISED)
                 }
@@ -1768,6 +1774,17 @@ class AapService : Service() {
         // the Wi-Fi lock: a new arm alone does not take ownership of those resources.
         val endedByHand = sessionEndedByHand
         sessionEndedByHand = false
+        DisconnectLog.noteDisconnected(
+            reason = when {
+                state.isUserExit -> "Disconnessione manuale"
+                state.isSettingsRestart -> "Riavvio per impostazioni salvate"
+                state.holdsRecovery -> "Schermata di Android Auto non aperta"
+                endedByHand -> "Sessione chiusa a mano"
+                state.isClean -> "Il telefono ha chiuso la sessione"
+                else -> "Collegamento perso"
+            },
+            unexpected = !state.isUserExit && !state.isSettingsRestart && !endedByHand,
+        )
         // Capture ownership when Bluetooth requests the stop, not when its terminal is
         // eventually observed: a skipped terminal must not lend this intent to a new arm.
         val bluetoothStandDown = pendingBtStandDown?.let(wifiLauncherManager::isCleanupCurrent) == true
@@ -1912,6 +1929,7 @@ class AapService : Service() {
                         // ordering below was written to prevent. Read off `active` afterwards, that
                         // ordering could never apply to this mode at all.
                         AppLog.i("AapService: Native AA user exit. Stopping active launcher.")
+                        releaseReconnectWakeLock()
                         wifiLauncherManager.stop()
                         wirelessTornDown = true
                     }
@@ -1924,10 +1942,13 @@ class AapService : Service() {
                         // is still tearing down is one that gets refused.
                         val launcher = wifiLauncherManager.active as? WifiLauncherNative
                         AppLog.i("AapService: Native AA session ended; keeping the ${launcher?.strategy ?: "wireless"} network up for the phone's return.")
+                        val wakePhone = SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(
+                            state.isClean, endedByHand
+                        )
+                        if (state.holdsRecovery) launcher?.handshakeManager?.holdNextWake(ReconnectBackoffPolicy.MAX_GAP_MS)
+                        if (wakePhone && !wifiLauncherManager.cancelledByUser) acquireReconnectWakeLock()
                         if (!wifiLauncherManager.cancelledByUser) launcher?.rearmAfterSessionEnd(
-                            wakePhone = SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(
-                                state.isClean, endedByHand
-                            ),
+                            wakePhone = wakePhone,
                         )
                         cleanupTicket = wifiLauncherManager.cleanupTicket()
                     }
@@ -2168,7 +2189,7 @@ class AapService : Service() {
             return
         }
         if (state.holdsRecovery) {
-            AppLog.i("AapService: not reconnecting by itself, the projection screen could not be raised.")
+            AppLog.i("AapService: no reconnect scheduled here, the projection screen could not be raised. Native AA's guardian keeps waking the phone at its own pace.")
             return
         }
 
@@ -3080,6 +3101,24 @@ class AapService : Service() {
         }
     }
 
+    /**
+     * Keeps the unit awake while the guardian looks for the phone. Capped, and not taken with the
+     * screen off: with the ignition off this must never hold the unit up against the car's battery.
+     */
+    private fun acquireReconnectWakeLock() {
+        if (ScreenPower.isInteractive(this) == false) return
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val lock = reconnectWakeLock ?: pm.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "HeadunitRevived::Reconnect"
+        ).apply { setReferenceCounted(false) }.also { reconnectWakeLock = it }
+        lock.acquire(RECONNECT_WAKE_LOCK_MS)
+    }
+
+    private fun releaseReconnectWakeLock() {
+        if (reconnectWakeLock?.isHeld == true) reconnectWakeLock?.release()
+    }
+
     private fun releaseBootWakeLock() {
         if (bootWakeLock?.isHeld == true) {
             bootWakeLock?.release()
@@ -3127,6 +3166,7 @@ class AapService : Service() {
         settingsPrefs?.unregisterOnSharedPreferenceChangeListener(deviceHackPreferenceListener)
         settingsPrefs = null
         releaseBootWakeLock()
+        releaseReconnectWakeLock()
 
         // Read before the first stop below: a destroy nobody asked for leaves the group up for the
         // next service to read, while the user's own stop takes it down.
@@ -4113,6 +4153,7 @@ class AapService : Service() {
 
         /** Delay before retrying USB connection after an unexpected disconnect. */
         private const val USB_RECONNECT_DELAY_MS = 3000L
+        private const val RECONNECT_WAKE_LOCK_MS = 15 * 60 * 1000L
 
         /** How often the USB deferral re-asks; well inside its own budget. */
         private const val USB_DEFERRAL_RECHECK_MS = 1_000L

@@ -45,15 +45,17 @@ object SessionEndGroupPolicy {
     /**
      * Whether the re-arm wakes the phone.
      *
-     * A phone that sent a ByeByeRequest chose to end the session, whatever its reason, so a poke
-     * pulls it straight back against that choice. A link that simply died chose nothing. Ending the
-     * session at this unit is the same kind of choice, made at this end: the network stays up so
-     * the phone can come back when it likes, and waking it would be arguing with the button.
+     * This fork's owner wants the phone back whenever the session ends unasked, and a phone sends
+     * a ByeByeRequest for reasons nobody in the car chose, so [phoneSaidGoodbye] no longer stands
+     * the wake down. The price is that closing Android Auto on the phone pulls it straight back:
+     * only ending the session at this unit stops the waking, because the network stays up so the
+     * phone can come back when it likes, and waking it would be arguing with the button.
      */
+    @Suppress("UNUSED_PARAMETER")
     fun wakesPhoneAfterSessionEnd(
         phoneSaidGoodbye: Boolean,
         headUnitEndedByHand: Boolean = false,
-    ): Boolean = !phoneSaidGoodbye && !headUnitEndedByHand
+    ): Boolean = !headUnitEndedByHand
 
     /** How long a poke waits after a session ends, so the phone can see the group again. */
     const val WAKE_SETTLE_MS = 5_000L

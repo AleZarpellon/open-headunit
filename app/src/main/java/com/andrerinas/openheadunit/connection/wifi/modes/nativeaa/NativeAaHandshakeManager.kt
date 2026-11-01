@@ -30,6 +30,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtDiscove
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zbt.ZbtDiscoveryPolicy
 import com.andrerinas.openheadunit.utils.BluetoothAddressSeedPolicy
 import com.andrerinas.openheadunit.utils.BluetoothHelper
+import com.andrerinas.openheadunit.utils.DisconnectLog
 import com.andrerinas.openheadunit.utils.bluetooth.BluetoothPeerDiscovery
 import com.andrerinas.openheadunit.aap.protocol.proto.Wireless
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.blink.BlinkAaCarrier
@@ -276,11 +277,47 @@ class NativeAaHandshakeManager(
     @Volatile private var aaListenerLost = false
     private var aaReopenJob: Job? = null
     private var aaReopenAttempts = 0
-    // The phone ended the last session itself, so it is listened for rather than woken. Lifted by
-    // the phone coming back, a manual poke, or a start(), never by time.
+    // The session was ended by hand at this unit, so the phone is listened for rather than woken.
+    // Lifted by the phone coming back, a manual poke, or a start(), never by time.
     @Volatile private var wakeStoodDown = false
     // When the last session ended, so the first poke after it can let the phone's WiFi settle.
     @Volatile private var sessionEndedAt = 0L
+    // Wake rounds since the last session, which is what the guardian's gaps grow with.
+    @Volatile private var guardianRounds = 0
+    // No automatic wake before this moment; see holdNextWake.
+    @Volatile private var wakeHeldUntil = 0L
+    private var guardianJob: Job? = null
+
+    /**
+     * Starts the check that nothing has quietly stopped trying. The wake loop ends by itself in
+     * several ways; asking for the credentials again goes through the same rules as any other
+     * wake, a manual disconnect included.
+     */
+    private fun startGuardian() {
+        guardianJob?.cancel()
+        guardianJob = scope.launch(Dispatchers.IO + CoroutineName("NativeAa-Guardian")) {
+            while (isActive) {
+                delay(ReconnectBackoffPolicy.GUARD_CHECK_MS)
+                val lapsed = ReconnectBackoffPolicy.wakeLapsed(
+                    running = isRunning,
+                    disconnected = commManager.connectionState.value is CommManager.ConnectionState.Disconnected,
+                    wakesPhone = wakesPhone(),
+                    wakeLoopRunning = pokeJob?.isActive == true,
+                    attemptInFlight = isAttemptInFlight(),
+                    selectionHeld = isSelectionPromptActive || isSelectionCanceled,
+                )
+                if (lapsed) {
+                    AppLog.i("NativeAA: guardian found nothing trying to bring the phone back; asking for the credentials again.")
+                    launcher.triggerWifiDirectRefresh()
+                }
+            }
+        }
+    }
+
+    /** Holds the next automatic wake for [ms]: a phone back too soon would only fail the same way. */
+    fun holdNextWake(ms: Long) {
+        wakeHeldUntil = SystemClock.elapsedRealtime() + ms
+    }
 
     /**
      * The radio coming back is the event a lost listener is really waiting for, and nothing else in
@@ -1037,6 +1074,7 @@ class NativeAaHandshakeManager(
         aaListenersClosedForSession = false
         aaListenerLost = false
         aaReopenAttempts = 0
+        startGuardian()
         registerBtStateReceiver()
         // Local Bluetooth radio name; logged on every accept so a dual-radio head unit's logs
         // show which radio the phone actually reached (compare with the HU name in the phone's
@@ -1267,6 +1305,7 @@ class NativeAaHandshakeManager(
     fun noteSessionEnded(wakePhone: Boolean) {
         wakeStoodDown = !wakePhone
         sessionEndedAt = SystemClock.elapsedRealtime()
+        guardianRounds = 0
         if (!wakePhone) {
             // Automatic workers recheck wakesPhone after waits and before each poke.
             // Do not mutate the shared job slot: a concurrent manual request may now own it.
@@ -2368,6 +2407,12 @@ class NativeAaHandshakeManager(
                 delay(settleMs)
             }
 
+            val heldMs = ReconnectBackoffPolicy.holdRemainingMs(wakeHeldUntil, SystemClock.elapsedRealtime())
+            if (heldMs > 0) {
+                AppLog.i("NativeAA: the projection screen could not be raised, so the next wake waits ${heldMs}ms.")
+                delay(heldMs)
+            }
+
             // Waited here as well as at the foot of the loop, because a refusal always arrives by
             // way of a handshake, and handing over the credentials cancels this loop - so a gap
             // held only at the foot is never reached. Measured held only there: a flat 15 s
@@ -2598,6 +2643,7 @@ class NativeAaHandshakeManager(
                     if (!wakesPhone()) break
                     AppLog.i("NativeAA: Attempting active poke to device: ${device.name} (${device.address})...")
                     ConnectionStageTracker.report(ConnectionStage.WAKING_PHONE)
+                    DisconnectLog.noteAttempt()
                     pokeDevice(device, holdMs = 15000)
                 }
 
@@ -2635,7 +2681,8 @@ class NativeAaHandshakeManager(
                 // refusal, and the driver-selection rounds happen with the user standing there
                 // having just pressed something. A refusal's own gap is usually spent at the head
                 // of the loop instead, since a refusal cancels the loop that earned it.
-                delay(JoinRefusalPolicy.retryDelayMs(consecutiveJoinRefusals, POKE_RETRY_GAP_MS))
+                guardianRounds++
+                delay(JoinRefusalPolicy.retryDelayMs(consecutiveJoinRefusals, ReconnectBackoffPolicy.gapMs(guardianRounds)))
             }
         }
     }
@@ -2824,6 +2871,7 @@ class NativeAaHandshakeManager(
         isRunning = true
         notStartedReason = null
         aaListenersClosedForSession = false
+        startGuardian()
         localRadioName = "external Bluetooth module"
         AppLog.i(
             "NativeAA: external Bluetooth module transport is on (${ZbtDiscovery.snapshot().decision.evidence}) " +
@@ -2973,6 +3021,7 @@ class NativeAaHandshakeManager(
         isRunning = true
         notStartedReason = null
         aaListenersClosedForSession = false
+        startGuardian()
         localRadioName = "FYT external Bluetooth module"
         // The module's own address, which the BLINK daemon keeps in a property. The phone is
         // bonded to that address, and without it no Bluetooth service is announced and calls stay
@@ -3032,6 +3081,7 @@ class NativeAaHandshakeManager(
         isRunning = true
         notStartedReason = null
         aaListenersClosedForSession = false
+        startGuardian()
         localRadioName = "ZJ socket (${ZjSocketProbe.path()})"
         // The module's own address, which the phone is bonded to. Without it no Bluetooth service
         // is announced and calls stay on the phone.
@@ -4191,6 +4241,8 @@ class NativeAaHandshakeManager(
         // The phone is on the network, which is the only thing that retires the stale-group count.
         pokesSinceLastAccept = 0
         escalationSpentLoggedFor = null
+        guardianRounds = 0
+        wakeHeldUntil = 0L
         if (pokeJob?.isActive == true) {
             AppLog.i("NativeAA: session is up — cancelling the poke retry loop")
         }
@@ -4236,6 +4288,8 @@ class NativeAaHandshakeManager(
         aaServerSocket = null
         hfpServerSocket = null
         credentialStore.withdraw()
+        guardianJob?.cancel()
+        guardianJob = null
         pokeJob?.cancel()
         pokeJob = null
         lastPokeTriggerCredentials = null

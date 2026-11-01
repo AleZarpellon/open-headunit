@@ -74,8 +74,9 @@ class SessionEndGroupPolicyTest {
     }
 
     @Test
-    fun `a phone that said goodbye is not woken again`() {
-        assertFalse(SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(phoneSaidGoodbye = true))
+    fun `a phone that said goodbye is woken again, unless the session was ended here`() {
+        assertTrue(SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(phoneSaidGoodbye = true))
+        assertFalse(SessionEndGroupPolicy.wakesPhoneAfterSessionEnd(phoneSaidGoodbye = true, headUnitEndedByHand = true))
     }
 
     @Test

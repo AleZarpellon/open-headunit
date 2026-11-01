@@ -29,7 +29,14 @@ Dati letti dalla schermata di sistema:
 |---|---|---|
 | `applicationId` = `io.github.alezarpellon.headunitcustom` | `app/build.gradle.kts`, `app/src/main/res/xml/shortcuts.xml` | Non entrare in conflitto con altre app. Il `namespace` del codice resta `com.andrerinas.openheadunit`. |
 | Nome app "HeadUnit Revived Custom" (stringhe `title` e `app_name`; l'icona usa `title`) | `values/strings.xml`, `values-it/strings.xml` | Nome scelto dal proprietario. Le altre lingue e i testi interni dell'app dicono ancora "Open Headunit". |
-| Versione 1.0 (`versionCode` 1) | `app/build.gradle.kts` | Numerazione nostra, 1.0, 1.1... |
+| Versione 1.1 (`versionCode` 3) | `app/build.gradle.kts` | Numerazione nostra, 1.0, 1.1... |
+| Guardiano di riconnessione: attese 2, 5, 10, 30 s e poi 30 s, controllo ogni 30 s che qualcosa stia ancora cercando il telefono | `nativeaa/ReconnectBackoffPolicy.kt`, `NativeAaHandshakeManager.kt` | Il proprietario vuole che la radio non si arrenda mai, salvo disconnessione manuale. |
+| Si bussa anche dopo un ByeBye del telefono | `nativeaa/SessionEndGroupPolicy.kt` | Era il principale punto di resa. Conseguenza: chiudere Android Auto dal telefono lo fa richiamare. |
+| Schermata non aperta due volte: si riprova dopo 30 s invece di fermarsi | `aap/AapService.kt` (`END_AND_HOLD`), `holdNextWake` | Stesso motivo. |
+| Blocco anti-sonno durante la ricerca: massimo 15 minuti e mai a schermo spento | `aap/AapService.kt` (`acquireReconnectWakeLock`) | Non deve tenere sveglia la radio a quadro spento e scaricare la batteria dell'auto. |
+| Registro disconnessioni, sempre attivo, con Salva e Condividi | `utils/DisconnectLog.kt`, `main/SettingsFragment.kt`, stringhe `disconnect_log*` | Richiesto dal proprietario, e il Bluetooth dalla radio non invia file: la schermata si può fotografare. |
+| "Esporta log" cerca l'ultimo file su disco | `utils/LogExporter.kt`, `utils/LogFilesHelper.kt` | Dopo un riavvio dell'app diceva "non disponibili" anche con i file presenti. |
+| La Action esegue anche i test | `.github/workflows/release-apk.yml` | Per accorgersi degli errori prima di installare. |
 | "Controlla aggiornamenti" punta a questo repository | `utils/UpdateChecker.kt` | Altrimenti proporrebbe l'APK ufficiale, con altro ID e altra firma. |
 | Avviso di versione modificata e link ai sorgenti | `main/AboutFragment.kt` | Richiesto dalla licenza AGPL-3.0. |
 | Pulsanti per aprire pagina di Zlink, impostazioni Android, info dispositivo e opzioni sviluppatore | `main/SettingsFragment.kt`, `layout/dialog_oem_app_manager.xml`, stringhe `oem_app_open_*` | La radio nasconde le impostazioni di Android: servono per disattivare Zlink e per ADB. |
@@ -55,12 +62,14 @@ Si compila solo su GitHub, non serve nulla sul PC.
 - `keystore.jkc`, presente nel repository originale, è pubblico: non va usato.
 
 ## Come funziona la riconnessione (modalità Native)
-È il telefono a chiamare la radio: la radio crea la rete Wi-Fi Direct, ascolta via Bluetooth e sulla porta 5288, e "bussa" al telefono via Bluetooth. Punti in cui oggi si arrende o rallenta:
-- `SessionEndGroupPolicy.wakesPhoneAfterSessionEnd`: se il telefono chiude con un ByeBye non bussa più, ascolta soltanto.
-- `AapService.scheduleReconnectIfNeeded`: `holdsRecovery`, la schermata di proiezione non si è aperta due volte.
-- `NativeAaHandshakeManager`: il ciclo dei tentativi si interrompe in alcuni casi. La riapertura dell'ascolto Bluetooth ha un numero limitato di tentativi.
-- `NativeAaWakeDamagePolicy`: se bussare fa perdere il vivavoce smette di bussare. Protegge le chiamate, va rispettato.
-- `AapService.acquireBootWakeLock`: il blocco che tiene sveglia la radio dura solo 10 minuti dall'avvio.
+È il telefono a chiamare la radio: la radio crea la rete Wi-Fi Direct, ascolta via Bluetooth e sulla porta 5288, e "bussa" al telefono via Bluetooth. Dalla v1.1 ci pensa il guardiano (vedi tabella sopra). Cosa resta volutamente:
+- La disconnessione manuale dalla radio ferma tutto.
+- `NativeAaWakeDamagePolicy` e `HandsFreeWakeEscalationPolicy`: se bussare fa perdere il vivavoce la radio lascia stare il telefono. Protegge le chiamate, va rispettato.
+- `JoinRefusalPolicy`: se il telefono rifiuta più volte la rete, l'attesa arriva fino a 2 minuti, oltre i 30 secondi chiesti.
+- Primo tentativo dopo 5 secondi (`WAKE_SETTLE_MS`): prima il telefono non vede ancora la rete.
+- La riapertura dell'ascolto Bluetooth ha un numero limitato di tentativi: non è stata toccata.
+
+Sulla strada verso casa del 2026-11-01 il proprietario ha notato piccole perdite di connessione con la v1.0.1. Causa non ancora nota: controllare il registro disconnessioni dopo la v1.1.
 
 ## Stato del lavoro
 - [x] Fork, Actions abilitate, branch `riconnessione-stabile`
@@ -69,7 +78,7 @@ Si compila solo su GitHub, non serve nulla sul PC.
 - [x] Prova della modalità Native sulla radio con Zlink disattivato e Wi-Fi acceso a mano: Android Auto, vivavoce e musica Bluetooth funzionano. Non parte da solo.
 - [x] Avvio automatico: funziona con "Non dormire" alla prima prova (vedi sezione La radio)
 - [x] Prova alla prima accensione del giorno dopo, senza toccare nulla: Android Auto parte da solo, Zlink resta disattivato, Wi-Fi acceso, vivavoce e musica funzionano
-- [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni
+- [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni (codice scritto, da provare sulla radio)
 - [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili)
 - [ ] Disattivare Zlink, solo dopo che la nostra app funziona bene
 - [ ] Fase 2: mappa di tutte le modifiche possibili

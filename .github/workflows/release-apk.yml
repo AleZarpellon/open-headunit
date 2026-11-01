@@ -56,6 +56,9 @@ jobs:
           test -n "$KEYSTORE_BASE64" || { echo "Secret HEADUNIT_KEYSTORE_BASE64 is missing" >&2; exit 1; }
           echo "$KEYSTORE_BASE64" | base64 --decode > headunit-release-key.jks
 
+      - name: Run unit tests
+        run: ./gradlew :app:testGithubDebugUnitTest --stacktrace
+
       - name: Assemble github release APK
         env:
           HEADUNIT_KEYSTORE_PASSWORD: ${{ secrets.HEADUNIT_KEYSTORE_PASSWORD }}

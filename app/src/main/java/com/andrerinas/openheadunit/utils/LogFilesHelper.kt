@@ -102,6 +102,12 @@ object LogFilesHelper {
         return candidate
     }
 
+    /** The latest non-empty log in [logDir], for an export after the process that wrote it is gone. */
+    fun newestLogFile(logDir: File?, prefix: String = LOG_FILE_PREFIX): File? =
+        logDir?.listFiles { _, name -> name.startsWith(prefix) }
+            ?.filter { it.length() > 0 }
+            ?.maxByOrNull { it.lastModified() }
+
     fun ensureDirectory(logDir: File) {
         if (!logDir.exists()) logDir.mkdirs()
     }

@@ -76,6 +76,7 @@ import com.andrerinas.openheadunit.view.PerformanceOverlayField
 import com.andrerinas.openheadunit.view.PerformanceOverlayPolicy
 import com.andrerinas.openheadunit.utils.LocaleHelper
 import com.andrerinas.openheadunit.BuildConfig
+import com.andrerinas.openheadunit.utils.DisconnectLog
 import com.andrerinas.openheadunit.utils.LogExporter
 import com.andrerinas.openheadunit.utils.SettingsBackupManager
 import com.andrerinas.openheadunit.utils.ToastUtils
@@ -2953,6 +2954,39 @@ class SettingsFragment : Fragment() {
                     }
                 }
                 updateSettingsList()
+            }
+        ))
+
+        items.add(SettingItem.SettingEntry(
+            stableId = "disconnectLog",
+            nameResId = R.string.disconnect_log,
+            value = getString(R.string.disconnect_log_description),
+            onClick = {
+                val context = requireContext()
+                DisconnectLog.init(context)
+                val history = DisconnectLog.read()
+                MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
+                    .setTitle(R.string.disconnect_log)
+                    .setMessage(history.ifEmpty { getString(R.string.disconnect_log_empty) })
+                    .setPositiveButton(R.string.disconnect_log_save) { _, _ ->
+                        val path = DisconnectLog.saveCopy(context)
+                        ToastUtils.showToast(
+                            context,
+                            if (path != null) getString(R.string.log_saved_to, path) else getString(R.string.failed_export_logs),
+                            Toast.LENGTH_LONG,
+                            force = true
+                        )
+                    }
+                    .setNeutralButton(R.string.share) { _, _ ->
+                        val copy = DisconnectLog.copyForSharing(context)
+                        if (copy != null) {
+                            LogExporter.shareLogFile(context, copy)
+                        } else {
+                            ToastUtils.showToast(context, getString(R.string.failed_export_logs), Toast.LENGTH_LONG, force = true)
+                        }
+                    }
+                    .setNegativeButton(R.string.close) { dialog, _ -> dialog.dismiss() }
+                    .show()
             }
         ))
 

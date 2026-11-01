@@ -207,6 +207,7 @@ class AapTransport(
 
         if (ret < 0) {
             AppLog.i("Quitting because ret < 0 ($ret)")
+            com.andrerinas.openheadunit.utils.DisconnectLog.noteCause("lettura dal telefono interrotta (codice $ret)")
             this.quit(clean = (ret == -2))
             return@Callback true
         }
