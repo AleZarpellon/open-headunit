@@ -106,6 +106,8 @@ Sul branch `personalizzazioni`, versione `v1.2-prova1`, non proposta come aggior
 
 Al buio, con la mappa di Waze in modalità notte, la barra resta sulla mappa e sparisce sui widget. La `v1.2-prova2` ridisegna la barra come la scheda di Android Auto, con copertina, colore preso dalla copertina e linea di avanzamento: secondo il proprietario funziona tutto, ma con una copertina chiara il testo bianco si leggeva male. La `v1.2-prova3` mette titolo e artista su una riga, ingrandisce testo e tasti e sceglie testo nero o bianco in base al colore della scheda.
 
-Le versioni stabili successive dovranno avere `versionCode` maggiore di 7, altrimenti non si installano sopra la prova.
+La `v1.2-prova4` aggiunge il tocco su nome e copertina, che invia `KEYCODE_MUSIC`: da verificare se Android Auto apre Spotify. La linea di avanzamento non si può trascinare: il protocollo non ha un comando per spostarsi nel brano e il proprietario ha scartato le alternative con i tasti di avanzamento veloce.
+
+Le versioni stabili successive dovranno avere `versionCode` maggiore di 8, altrimenti non si installano sopra la prova.
 
 La Action `Controlla originale` è stata provata solo nel caso "niente da fare". Il ramo che unisce e apre la Pull Request non è ancora stato eseguito.

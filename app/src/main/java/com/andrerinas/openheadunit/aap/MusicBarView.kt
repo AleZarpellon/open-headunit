@@ -52,6 +52,8 @@ class MusicBarView(context: Context, private val onKey: (Int) -> Unit) : FrameLa
     init {
         setBackgroundColor(Color.BLACK)
         isClickable = true
+        artView.setOnClickListener { onKey(KeyEvent.KEYCODE_MUSIC) }
+        nowPlaying.setOnClickListener { onKey(KeyEvent.KEYCODE_MUSIC) }
 
         val row = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
