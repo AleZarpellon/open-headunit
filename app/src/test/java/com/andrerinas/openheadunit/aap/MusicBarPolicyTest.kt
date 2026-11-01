@@ -81,12 +81,13 @@ class MusicBarPolicyTest {
     }
 
     @Test
-    fun `a bright cover still leaves a dark card for white text`() {
-        val color = MusicBarPolicy.cardColorFor(0xFFFFFFFF.toInt())
-        assertEquals(0xFF, (color shr 24) and 0xFF)
-        assertTrue(((color shr 16) and 0xFF) <= 110)
-        assertTrue(((color shr 8) and 0xFF) <= 110)
-        assertTrue((color and 0xFF) <= 110)
+    fun `the text is dark on a bright cover and white on a dark one`() {
+        val bright = MusicBarPolicy.cardColorFor(0xFFFFFFFF.toInt())
+        val dark = MusicBarPolicy.cardColorFor(0xFF101020.toInt())
+        assertEquals(0xFF, (bright shr 24) and 0xFF)
+        assertEquals(0xFF111111.toInt(), MusicBarPolicy.contentColorOn(bright))
+        assertEquals(0xFFFFFFFF.toInt(), MusicBarPolicy.contentColorOn(dark))
+        assertEquals(0xFFFFFFFF.toInt(), MusicBarPolicy.contentColorOn(MusicBarPolicy.DEFAULT_CARD_COLOR))
     }
 
     @Test

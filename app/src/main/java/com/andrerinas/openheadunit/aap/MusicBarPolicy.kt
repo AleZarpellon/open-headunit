@@ -22,8 +22,8 @@ object MusicBarPolicy {
     const val READINGS_TO_SKIP_AFTER_MOVE = 3
 
     const val DEFAULT_CARD_COLOR = 0xFF2A2A2E.toInt()
-    private const val COVER_PERCENT = 45
-    private const val MAX_CARD_CHANNEL = 110
+    private const val COVER_PERCENT = 60
+    private const val LIGHT_CARD_LUMA = 140
 
     private const val DARK_LUMA = 28
     private const val DARK_ROWS_PERCENT = 95
@@ -56,15 +56,19 @@ object MusicBarPolicy {
         if (durationSeconds <= 0) null
         else (positionSeconds.toFloat() / durationSeconds).coerceIn(0f, 1f)
 
-    /** The cover's average colour pulled towards the card's own dark grey, so white stays readable. */
+    /** The cover's average colour, pulled a little towards the card's own grey. */
     fun cardColorFor(averageArgb: Int): Int {
         val mix = { shift: Int ->
             val cover = (averageArgb shr shift) and 0xFF
             val base = (DEFAULT_CARD_COLOR shr shift) and 0xFF
-            ((cover * COVER_PERCENT + base * (100 - COVER_PERCENT)) / 100).coerceAtMost(MAX_CARD_CHANNEL)
+            (cover * COVER_PERCENT + base * (100 - COVER_PERCENT)) / 100
         }
         return (0xFF shl 24) or (mix(16) shl 16) or (mix(8) shl 8) or mix(0)
     }
+
+    /** Black on a light card, white on a dark one. */
+    fun contentColorOn(cardArgb: Int): Int =
+        if (luma(cardArgb) > LIGHT_CARD_LUMA) 0xFF111111.toInt() else 0xFFFFFFFF.toInt()
 
     private fun luma(argb: Int): Int {
         val r = (argb shr 16) and 0xFF
