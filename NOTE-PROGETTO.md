@@ -56,7 +56,8 @@ Si compila solo su GitHub, non serve nulla sul PC.
 - [x] Fork, Actions abilitate, branch `riconnessione-stabile`
 - [x] Identità, firma e Action di Release (v1.0)
 - [x] v1.0.1: pulsanti per aprire le schermate di sistema nascoste
-- [ ] Prova della modalità Native sulla radio: si collega secondo il proprietario, ma da verificare che Android Auto passi dalla nostra app e non da Zlink
+- [x] Prova della modalità Native sulla radio con Zlink disattivato e Wi-Fi acceso a mano: Android Auto, vivavoce e musica Bluetooth funzionano. Non parte da solo.
+- [ ] Avvio automatico: prova con "Avvia all'accensione" e con Zlink di nuovo attivo. La radio riattiva Zlink a ogni riavvio, anche se disattivato dalla sua pagina. Da verificare se il Wi-Fi resta acceso dopo il riavvio.
 - [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni
 - [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili)
 - [ ] Disattivare Zlink, solo dopo che la nostra app funziona bene
