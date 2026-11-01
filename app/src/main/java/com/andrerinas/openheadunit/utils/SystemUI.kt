@@ -40,17 +40,18 @@ object SystemUI {
 
     /**
      * [notesCanvas] false for a window that is not the projection, so it cannot describe a canvas
-     * the video will never be drawn into.
+     * the video will never be drawn into. [extraBottom] is space kept free under the manual insets.
      */
     fun apply(
         window: Window,
         root: View,
         mode: Settings.FullscreenMode,
         notesCanvas: Boolean = true,
+        extraBottom: Int = 0,
         onInsetsChanged: (() -> Unit)? = null,
     ) {
         applySystemBars(window, mode)
-        applyInsets(window, root, mode, notesCanvas, onInsetsChanged)
+        applyInsets(window, root, mode, notesCanvas, extraBottom, onInsetsChanged)
     }
 
     /** Configures dialog windows without changing the projection's canvas or manual insets. */
@@ -154,6 +155,7 @@ object SystemUI {
         root: View,
         mode: Settings.FullscreenMode,
         notesCanvas: Boolean,
+        extraBottom: Int,
         onInsetsChanged: (() -> Unit)?,
     ) {
         val settings = Settings(root.context)
@@ -162,7 +164,7 @@ object SystemUI {
         val manualL = settings.insetLeft
         val manualT = settings.insetTop
         val manualR = settings.insetRight
-        val manualB = settings.insetBottom
+        val manualB = settings.insetBottom + extraBottom
 
         // Read before the line below re-seeds the insets: until it runs, the content area and the
         // insets in force describe the same layout, and afterwards one half of the pair is stale.

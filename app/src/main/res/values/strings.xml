@@ -1495,6 +1495,10 @@
     <string name="update_later">Later</string>
     <string name="update_downloading">Downloading the update…</string>
     <string name="update_download_failed">Could not download the update. Opening the release page.</string>
+    <string name="music_bar">Music bar</string>
+    <string name="music_bar_description">Experimental. A strip under Android Auto with the track and its controls. Takes effect when Android Auto next opens.</string>
+    <string name="music_bar_hide_outside_map">Only over a map</string>
+    <string name="music_bar_hide_outside_map_description">Looks at the picture to hide the bar on the widget screen and on dark full-screen apps, and gives the space back to Android Auto.</string>
     <string name="disconnect_log">Disconnection history</string>
     <string name="disconnect_log_description">When the connection dropped, why, and how long it took to come back.</string>
     <string name="disconnect_log_empty">Nothing recorded yet.</string>

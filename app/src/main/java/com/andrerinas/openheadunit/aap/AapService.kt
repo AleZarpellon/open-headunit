@@ -541,6 +541,7 @@ class AapService : Service() {
     private fun onAaMediaMetadataFromPhone(meta: MediaPlayback.MediaMetaData, session: AaPresentationSession) {
         if (!acceptPresentationSession(session)) return
         lastAaMediaMetadata = meta
+        NowPlayingState.onMetadata(meta.song, meta.artist)
         if (!shouldSyncAaMediaMetadata()) return
         // Avoid showing a previous track's art with new title/artist until decode finishes.
         cachedAaAlbumArtBitmap = null
@@ -555,6 +556,7 @@ class AapService : Service() {
         val isPlayingFromStatus = resolveIsPlayingFromStatus(status)
         lastAaPlaybackIsPlaying = isPlayingFromStatus
         mediaSessionIsPlaying = isPlayingFromStatus
+        NowPlayingState.onPlaying(isPlayingFromStatus)
 
         if (!shouldSyncAaMediaMetadata()) return
         updateMediaSessionState(isPlayingFromStatus)
@@ -1774,6 +1776,7 @@ class AapService : Service() {
         // the Wi-Fi lock: a new arm alone does not take ownership of those resources.
         val endedByHand = sessionEndedByHand
         sessionEndedByHand = false
+        NowPlayingState.clear()
         DisconnectLog.noteDisconnected(
             reason = when {
                 state.isUserExit -> "Disconnessione manuale"

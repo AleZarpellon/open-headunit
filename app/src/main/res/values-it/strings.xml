@@ -168,6 +168,10 @@
     <string name="update_later">Più tardi</string>
     <string name="update_downloading">Scaricamento dell\'aggiornamento…</string>
     <string name="update_download_failed">Impossibile scaricare l\'aggiornamento. Apro la pagina della versione.</string>
+    <string name="music_bar">Barra della musica</string>
+    <string name="music_bar_description">Sperimentale. Una striscia sotto Android Auto con il brano e i comandi. Ha effetto alla prossima apertura di Android Auto.</string>
+    <string name="music_bar_hide_outside_map">Solo sopra una mappa</string>
+    <string name="music_bar_hide_outside_map_description">Guarda l\'immagine per nascondere la barra sulla schermata dei widget e sulle app scure a schermo intero, e restituisce lo spazio ad Android Auto.</string>
     <string name="disconnect_log">Registro disconnessioni</string>
     <string name="disconnect_log_description">Quando è caduto il collegamento, perché e dopo quanto è tornato.</string>
     <string name="disconnect_log_empty">Ancora nessuna registrazione.</string>

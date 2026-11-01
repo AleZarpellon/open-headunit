@@ -98,6 +98,12 @@ Sulla strada verso casa del 2026-11-01 il proprietario ha notato piccole perdite
 - [ ] Fase 3: personalizzazioni su branch `personalizzazioni`, con Release separata
 
 ## Idea da provare: mappa grande e barra di Spotify
-Il proprietario vuole mappa più grande e Spotify come barra stretta in basso. Il DPI non basta: a 218, 256 e 300 le schede a destra restano; da 256 la barra delle icone passa in basso. Piano proposto, in attesa di ok: chiedere al telefono un video 1920x1080 con margini (`margin_width`, `margin_height`), mostrarlo senza ingrandirlo con l'angolo in alto a sinistra allineato allo schermo, così le schede restano fuori, e aggiungere una barra nostra in basso. Android Auto disegna in alto a sinistra e lascia il margine in basso (`TouchCoordinateMapper`). Da superare: `hardCeilingForPanel` e `narrowBandCeiling` limitano oggi il video a 720p. Incognite: decodifica a 1080p sulla radio, banda Wi-Fi, disposizione scelta dal telefono, posizione delle notifiche. Il testo delle notifiche non arriva alla radio: `GenericNotificationService` nel protocollo è vuoto e il codice non lo usa, quindi restano dentro il video di Android Auto. Versione di prova: tag `v1.2-prova1`, così il controllo aggiornamenti non la propone, che resta confrontata come uguale alla 1.2.
+Il proprietario vuole mappa grande e Spotify come barra stretta in basso. Toccando l'icona di Waze Android Auto apre già la mappa a tutta larghezza, senza schede, quindi non serve ritagliare il video. Il testo delle notifiche non arriva alla radio: `GenericNotificationService` nel protocollo è vuoto e il codice non lo usa, quindi restano dentro il video di Android Auto.
+
+Sul branch `personalizzazioni`, versione `v1.2-prova1`, non proposta come aggiornamento perché viene confrontata come uguale alla 1.2 ed esce come pre-release. Interruttori in Impostazioni → Audio, spenti di serie:
+- **Barra della musica** (`aap/MusicBarView.kt`, `aap/NowPlayingState.kt`): sta nel contenuto della finestra, nello spazio liberato dal padding del `container`.
+- **Solo sopra una mappa** (`aap/MusicBarPolicy.kt`): ogni 1,5 s legge l'immagine in piccolo e cerca una colonna scura nella metà destra. La trova nella fessura dei widget e nelle app scure, non sulle mappe. Il margine passa da 0 a 80 tramite `SystemUI.apply(extraBottom)`, che poi riannuncia i margini al telefono. Da provare: se Android Auto si adatta senza scollegarsi, se i tocchi restano giusti, se la lettura rallenta il video. Funziona solo con TextureView.
+
+Le versioni stabili successive dovranno avere `versionCode` maggiore di 5, altrimenti non si installano sopra la prova.
 
 La Action `Controlla originale` è stata provata solo nel caso "niente da fare". Il ramo che unisce e apre la Pull Request non è ancora stato eseguito.

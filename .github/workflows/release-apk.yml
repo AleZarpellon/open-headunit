@@ -4,7 +4,7 @@ name: Release APK
 # A tag such as v1.0 also publishes it as a Release, with notes from note-release/<tag>.md.
 on:
   push:
-    branches: [riconnessione-stabile]
+    branches: [riconnessione-stabile, personalizzazioni]
     tags: ['v*']
 
 permissions:
@@ -99,11 +99,16 @@ jobs:
             *) echo "Tag $TAG does not match versionName in $APK" >&2; exit 1 ;;
           esac
           test -f "note-release/$TAG.md" || { echo "Missing note-release/$TAG.md" >&2; exit 1; }
+          # A tag such as v1.2-prova1 is a trial: it must never become the latest release.
+          case "$TAG" in
+            *-*) kind=--prerelease ;;
+            *) kind=--latest ;;
+          esac
           gh release create "$TAG" "$APK" \
             --repo "$GITHUB_REPOSITORY" \
             --title "HeadUnit Revived Custom $TAG" \
             --notes-file "note-release/$TAG.md" \
-            --latest
+            "$kind"
 
       - name: Remove signing key
         if: always()

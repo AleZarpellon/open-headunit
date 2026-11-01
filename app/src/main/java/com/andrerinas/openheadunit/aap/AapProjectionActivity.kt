@@ -89,6 +89,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private val settings: Settings by lazy { Settings(this) }
     private val cachedKeyCodes: Map<Int, Int> by lazy { settings.keyCodes }
     private var isSurfaceSet = false
+    private var musicBar: MusicBarView? = null
+    private var musicBarReservePx = 0
+    private var musicBarScreenDark = false
+    private var musicBarReadingsToSkip = 0
+    private val musicBarReading = StableReading(MusicBarPolicy.READINGS_TO_CHANGE)
     private var ownedSurface: android.view.Surface? = null
     private var overlayState = OverlayState.STARTING
     private val watchdogHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -1232,6 +1237,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         container.addView(overlayView)
         overlayView.requestFocus()
         setFullscreen() // Call setFullscreen here as well
+        setupMusicBar()
 
         val loadingOverlay = findViewById<View>(R.id.loading_overlay)
         if (settings.hudMirroring) {
@@ -1691,6 +1697,72 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
     }
 
+    /** Adds the music bar if it is switched on, and starts following the music and the screen. */
+    private fun setupMusicBar() {
+        if (!settings.musicBarEnabled) return
+        val bar = MusicBarView(this) { keyCode ->
+            commManager.sendKey(keyCode, true, null, "music-bar")
+            commManager.sendKey(keyCode, false, null, "music-bar")
+        }
+        bar.visibility = View.GONE
+        // Beside the container, not in it: the bar sits in the space the container's padding frees.
+        findViewById<ViewGroup>(android.R.id.content).addView(
+            bar,
+            FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, MusicBarPolicy.BAR_HEIGHT_PX, Gravity.BOTTOM)
+        )
+        musicBar = bar
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    NowPlayingState.current.collect {
+                        bar.show(it)
+                        updateMusicBar()
+                    }
+                }
+                if (settings.musicBarHideOutsideMap) {
+                    while (true) {
+                        kotlinx.coroutines.delay(MusicBarPolicy.CHECK_INTERVAL_MS)
+                        readScreenForMusicBar()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun readScreenForMusicBar() {
+        if (musicBarReadingsToSkip > 0) {
+            musicBarReadingsToSkip--
+            return
+        }
+        val view = projectionView as? com.andrerinas.openheadunit.view.TextureProjectionView ?: return
+        val pixels = view.capturePixels(MusicBarPolicy.SAMPLE_WIDTH, MusicBarPolicy.SAMPLE_HEIGHT) ?: return
+        val dark = musicBarReading.feed(
+            MusicBarPolicy.hasDarkColumn(pixels, MusicBarPolicy.SAMPLE_WIDTH, MusicBarPolicy.SAMPLE_HEIGHT)
+        )
+        if (dark != musicBarScreenDark) {
+            AppLog.i("MusicBar: the screen now reads as ${if (dark) "not a map" else "a map"}")
+            musicBarScreenDark = dark
+            updateMusicBar()
+        }
+    }
+
+    private fun updateMusicBar() {
+        val bar = musicBar ?: return
+        val show = MusicBarPolicy.showsBar(
+            enabled = true,
+            hasMedia = NowPlayingState.current.value != null,
+            hideOutsideMap = settings.musicBarHideOutsideMap,
+            screenIsDark = musicBarScreenDark,
+        )
+        bar.visibility = if (show) View.VISIBLE else View.GONE
+        val reserve = if (show) MusicBarPolicy.BAR_HEIGHT_PX else 0
+        if (reserve == musicBarReservePx) return
+        AppLog.i("MusicBar: bottom margin $musicBarReservePx -> $reserve")
+        musicBarReservePx = reserve
+        musicBarReadingsToSkip = MusicBarPolicy.READINGS_TO_SKIP_AFTER_MOVE
+        setFullscreen()
+    }
+
     private fun setFullscreen() {
         val container = findViewById<View>(R.id.container)
 
@@ -1701,7 +1773,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             window.addFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
 
-        SystemUI.apply(window, container, mode) {
+        SystemUI.apply(window, container, mode, extraBottom = musicBarReservePx) {
             if (::projectionView.isInitialized) {
                 ProjectionViewScaler.updateScale(projectionView as View, videoDecoder.videoWidth, videoDecoder.videoHeight)
             }

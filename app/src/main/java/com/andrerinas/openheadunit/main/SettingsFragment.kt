@@ -2479,6 +2479,30 @@ class SettingsFragment : Fragment() {
             }
         ))
 
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "musicBarEnabled",
+            nameResId = R.string.music_bar,
+            descriptionResId = R.string.music_bar_description,
+            isChecked = settings.musicBarEnabled,
+            onCheckedChanged = { isChecked ->
+                settings.musicBarEnabled = isChecked
+                updateSettingsList()
+            }
+        ))
+
+        if (settings.musicBarEnabled) {
+            items.add(SettingItem.ToggleSettingEntry(
+                stableId = "musicBarHideOutsideMap",
+                nameResId = R.string.music_bar_hide_outside_map,
+                descriptionResId = R.string.music_bar_hide_outside_map_description,
+                isChecked = settings.musicBarHideOutsideMap,
+                onCheckedChanged = { isChecked ->
+                    settings.musicBarHideOutsideMap = isChecked
+                    updateSettingsList()
+                }
+            ))
+        }
+
         items.add(SettingItem.SettingEntry(
             stableId = "micSettings",
             nameResId = R.string.microphone_settings,

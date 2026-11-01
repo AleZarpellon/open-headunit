@@ -457,6 +457,18 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("wifi-restart-adb-verified", false)
         set(value) = prefs.edit().putBoolean("wifi-restart-adb-verified", value).apply()
 
+    var musicBarEnabled: Boolean
+        get() = prefs.getBoolean("music_bar_enabled", false)
+        set(value) {
+            prefs.edit().putBoolean("music_bar_enabled", value).apply()
+        }
+
+    var musicBarHideOutsideMap: Boolean
+        get() = prefs.getBoolean("music_bar_hide_outside_map", true)
+        set(value) {
+            prefs.edit().putBoolean("music_bar_hide_outside_map", value).apply()
+        }
+
     var gestureHintShown: Boolean
         get() = prefs.getBoolean("gesture_hint_shown", false)
         set(value) {

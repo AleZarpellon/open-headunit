@@ -158,6 +158,16 @@ class TextureProjectionView @JvmOverloads constructor(
      */
     fun captureBitmap(): Bitmap? = if (isAvailable) runCatching { getBitmap() }.getOrNull() else null
 
+    /** The picture scaled down to this size, as ARGB pixels. Call it on the UI thread. */
+    fun capturePixels(width: Int, height: Int): IntArray? {
+        if (!isAvailable) return null
+        val bitmap = runCatching { getBitmap(width, height) }.getOrNull() ?: return null
+        return IntArray(width * height).also {
+            bitmap.getPixels(it, 0, width, 0, 0, width, height)
+            bitmap.recycle()
+        }
+    }
+
     /**
      * The transform of the frame on screen, which carries the decoder's crop. [captureBitmap]
      * ignores it, so a padded buffer shows its padding there. Call it on the UI thread.
