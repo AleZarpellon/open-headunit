@@ -15,8 +15,10 @@ Dati letti dalla schermata di sistema:
 - Test video dell'app superato: H.264 a 480p e 720p
 - Modello indicato da Android: K706. Le impostazioni di Android si aprono anche da Sistema → Di più nel menu del produttore. Il loro aspetto ("App e notifiche") fa pensare a un Android più vecchio del 14 dichiarato.
 - Menu Generale → Tempo di sonno: Non dormire, 2 ore, 1, 3 o 7 giorni (impostato: 7 giorni). Col quadro spento per 2 minuti la radio dorme e non si riavvia: Zlink resta disattivato. Zlink torna dopo un riavvio vero.
-- Nessuna voce "Batteria" nella pagina dell'app e nessuna "Ottimizzazione della batteria" in Accesso speciale alle app.
-- Al risveglio l'app non si apre da sola, nemmeno con avvio all'accensione, allo schermo acceso e via Bluetooth. Il log creato alla prova porta l'ora dell'apertura a mano: probabilmente la radio chiude l'app in standby. Indizio, non prova.
+- Nessuna voce "Batteria" nella pagina dell'app e nessuna "Ottimizzazione della batteria" in Accesso speciale alle app. Le impostazioni giuste si trovano cercando "batteria" nella ricerca di Android.
+- Impostazioni della radio per l'app, in Batteria: Gestione avvio automatico → Avvio automatico app e Avvio secondario app su Consenti; Chiudi app dopo blocco schermo su Non chiudere; Ottimizzatore standby app → App ottimizzata spenta.
+- Prima di queste impostazioni l'app non si apriva da sola al risveglio e il log portava l'ora dell'apertura a mano. Dopo, la Home della radio mostra "Android Auto – Connesso" senza aprire nulla e, toccando l'icona, il collegamento è quasi immediato. La schermata però non viene ancora in primo piano da sola: causa da capire con un log.
+- L'avviso giallo sul Wi-Fi spento può restare visibile anche a Wi-Fi acceso.
 
 ## Cosa cambia rispetto all'originale
 | Cosa | Dove | Perché |
