@@ -56,7 +56,7 @@ class MusicBarView(context: Context, private val onKey: (Int) -> Unit) : FrameLa
         val row = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(6, 0, 8, 0)
+            setPadding(20, 0, 8, 0)
             background = card
         }
         row.addView(artView, LinearLayout.LayoutParams(ART_SIZE, ART_SIZE).apply { rightMargin = 14 })
