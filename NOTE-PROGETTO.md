@@ -92,7 +92,9 @@ Sulla strada verso casa del 2026-11-01 il proprietario ha notato piccole perdite
 - [x] Avvio automatico: funziona con "Non dormire" alla prima prova (vedi sezione La radio)
 - [x] Prova alla prima accensione del giorno dopo, senza toccare nulla: Android Auto parte da solo, Zlink resta disattivato, Wi-Fi acceso, vivavoce e musica funzionano
 - [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni. Prove da fermo del 2026-11-01 con il registro: Wi-Fi spento 10 s e arresto forzato di Android Auto tornano da soli in 6-12 s con 0 tentativi (il telefono torna senza che la radio bussi, quindi il guardiano non è ancora stato messo alla prova); "Interrompi connessione" registrata come manuale, nessun ritorno da solo secondo il proprietario; chiamata sulle casse senza cadute, ma probabilmente dopo il ritorno. Salva funziona. Il proprietario dice che la prova con Wi-Fi spento per 3 minuti e chiamata in mezzo funziona, ma la foto del registro manca: tentativi maggiori di 0 e vivavoce mentre la radio bussa restano da confermare. I blocchi tornando a casa erano leggeri e solo sulla musica, senza disconnessioni: al prossimo viaggio confrontare musica scaricata e in streaming e guardare se si ferma anche la mappa.
-- [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili): scritti nella v1.2, l'avviso è da vedere con la versione successiva. Audio: moltiplicatore di latenza a 16x sulla radio, quindi già alto; prossima prova Audio AAC.
+- [x] Controllo aggiornamenti all'avvio: provato sulla radio con la v1.3
+- [ ] Pull Request settimanale dall'originale (solo versioni stabili): attiva, il ramo che apre la proposta si vedrà alla prima versione stabile
+- [ ] Blocchi leggeri alla musica in viaggio, con mappa ferma regolare e Spotify scaricato. Audio: moltiplicatore di latenza a 16x sulla radio, quindi già alto; prossima prova Audio AAC.
 - [ ] Disattivare Zlink, solo dopo che la nostra app funziona bene
 - [x] Fase 2: mappa di tutte le modifiche possibili, in `MAPPA-MODIFICHE.md`. Il proprietario deve ancora scegliere le voci.
 - [ ] Fase 3: personalizzazioni su branch `personalizzazioni`, con Release separata
@@ -106,7 +108,7 @@ Sul branch `personalizzazioni`, versione `v1.2-prova1`, non proposta come aggior
 
 Al buio, con la mappa di Waze in modalità notte, la barra resta sulla mappa e sparisce sui widget. La `v1.2-prova2` ridisegna la barra come la scheda di Android Auto, con copertina, colore preso dalla copertina e linea di avanzamento: secondo il proprietario funziona tutto, ma con una copertina chiara il testo bianco si leggeva male. La `v1.2-prova3` mette titolo e artista su una riga, ingrandisce testo e tasti e sceglie testo nero o bianco in base al colore della scheda.
 
-La `v1.2-prova4` aggiunge il tocco su nome e copertina, che invia `KEYCODE_MUSIC`: sulla radio apre Spotify. Tutto questo è confluito nella v1.3 e il branch `personalizzazioni` è stato unito a `riconnessione-stabile`, che resta l'unico branch di lavoro. La v1.3 serve anche a provare l'avviso di aggiornamento: da confermare. La linea di avanzamento non si può trascinare: il protocollo non ha un comando per spostarsi nel brano e il proprietario ha scartato le alternative con i tasti di avanzamento veloce.
+La `v1.2-prova4` aggiunge il tocco su nome e copertina, che invia `KEYCODE_MUSIC`: sulla radio apre Spotify. Tutto questo è confluito nella v1.3 e il branch `personalizzazioni` è stato unito a `riconnessione-stabile`, che resta l'unico branch di lavoro. L'aggiornamento dall'app dalla prova 4 alla v1.3 ha funzionato sulla radio, secondo il proprietario. La linea di avanzamento non si può trascinare: il protocollo non ha un comando per spostarsi nel brano e il proprietario ha scartato le alternative con i tasti di avanzamento veloce.
 
 Le versioni stabili successive dovranno avere `versionCode` maggiore di 8, altrimenti non si installano sopra la prova.
 
