@@ -20,6 +20,7 @@ Dati letti dalla schermata di sistema:
 - Prima di queste impostazioni l'app non si apriva da sola al risveglio e il log portava l'ora dell'apertura a mano. Dopo, la Home della radio mostra "Android Auto – Connesso" senza aprire nulla e, toccando l'icona, il collegamento è quasi immediato. La schermata però non viene ancora in primo piano da sola.
 - Prova del 2026-11-01: quadro spento alle 04:52:56 circa, riacceso alle 04:55:58 circa, icona toccata poco dopo le 04:56:58. File di log: uno creato alle 04:52:24 e fermo alle 04:52:35, uno nuovo creato alle 04:57:01. Un file nuovo vuol dire un processo nuovo: nonostante le impostazioni, l'app probabilmente è morta in standby ed è ripartita solo col tocco. "Android Auto – Connesso" sulla Home quindi non prova che l'app sia viva. Non si è letto il contenuto dei file.
 - Prova con "Usa come launcher auto": al risveglio resta la Home della radio e, secondo il proprietario, nemmeno il tasto Home apre la nostra app. Strada scartata. Restano "Non dormire" (Zlink torna a ogni avvio), ADB da PC, oppure un tocco sull'icona a ogni accensione.
+- **Configurazione che funziona (prima prova, 2026-11-01):** Generale → Tempo di sonno su "Non dormire", con Avvia all'accensione acceso e le impostazioni di Batteria qui sopra. Dopo 2 minuti a quadro spento la radio riparte col logo, l'app si apre da sola e Android Auto parte dalla nostra app, in circa 20-30 secondi. Zlink è rimasto disattivato, anche se dopo i riavvii precedenti era tornato attivo: da riprovare. Da verificare anche dopo una notte e se il Wi-Fi resta acceso.
 - I log con posizione "Cartella Download" stanno in `Android/data/io.github.alezarpellon.headunitcustom/files/Download/OpenHeadunitLogs/`, visibili col gestore file della radio. "Esporta log" può dire che non sono disponibili anche se i file ci sono.
 - L'avviso giallo sul Wi-Fi spento può restare visibile anche a Wi-Fi acceso.
 
@@ -66,7 +67,8 @@ Si compila solo su GitHub, non serve nulla sul PC.
 - [x] Identità, firma e Action di Release (v1.0)
 - [x] v1.0.1: pulsanti per aprire le schermate di sistema nascoste
 - [x] Prova della modalità Native sulla radio con Zlink disattivato e Wi-Fi acceso a mano: Android Auto, vivavoce e musica Bluetooth funzionano. Non parte da solo.
-- [ ] Avvio automatico: prova con "Avvia all'accensione" e con Zlink di nuovo attivo. La radio riattiva Zlink a ogni riavvio, anche se disattivato dalla sua pagina. Da verificare se il Wi-Fi resta acceso dopo il riavvio.
+- [x] Avvio automatico: funziona con "Non dormire" alla prima prova (vedi sezione La radio)
+- [ ] Ripetere la prova dopo una notte: avvio automatico, Zlink disattivato, Wi-Fi acceso
 - [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni
 - [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili)
 - [ ] Disattivare Zlink, solo dopo che la nostra app funziona bene
