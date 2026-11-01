@@ -206,6 +206,7 @@ class AapService : Service() {
 
     private var aaPresentationSession: AaPresentationSession? = null
     private var lastAaMediaMetadata: MediaPlayback.MediaMetaData? = null
+    @Volatile private var musicBarArtHash = 0
     private var lastAaPlaybackPositionMs: Long = 0L
     private var lastAaPlaybackIsPlaying: Boolean? = null
     private val reconnectPlayback = ReconnectPlaybackSnapshot()
@@ -541,17 +542,33 @@ class AapService : Service() {
     private fun onAaMediaMetadataFromPhone(meta: MediaPlayback.MediaMetaData, session: AaPresentationSession) {
         if (!acceptPresentationSession(session)) return
         lastAaMediaMetadata = meta
-        NowPlayingState.onMetadata(meta.song, meta.artist)
+        NowPlayingState.onMetadata(meta.song, meta.artist, meta.durationSeconds)
+        updateMusicBarArt(meta)
         if (!shouldSyncAaMediaMetadata()) return
         // Avoid showing a previous track's art with new title/artist until decode finishes.
         cachedAaAlbumArtBitmap = null
         scheduleApplyAaMediaMetadata(meta)
     }
 
+    /** The phone repeats the picture with every update, so it is decoded only when it changes. */
+    private fun updateMusicBarArt(meta: MediaPlayback.MediaMetaData) {
+        if (!App.provide(this).settings.musicBarEnabled) return
+        if (!meta.hasAlbumArt() || meta.albumArt.isEmpty) return
+        val bytes = meta.albumArt.toByteArray()
+        val hash = bytes.contentHashCode()
+        if (hash == musicBarArtHash && NowPlayingState.current.value?.art != null) return
+        musicBarArtHash = hash
+        serviceScope.launch(Dispatchers.Default) {
+            val art = decodeAlbumArt(bytes)?.let { Bitmap.createScaledBitmap(it, MUSIC_BAR_ART_PX, MUSIC_BAR_ART_PX, true) }
+            NowPlayingState.onArt(meta.song, art)
+        }
+    }
+
     private fun onAaPlaybackStatusFromPhone(status: MediaPlayback.MediaPlaybackStatus, session: AaPresentationSession) {
         if (!acceptPresentationSession(session)) return
         if (status.hasPlaybackSeconds()) {
             lastAaPlaybackPositionMs = status.playbackSeconds.protoUint32ToLong() * 1000L
+            NowPlayingState.onPosition(status.playbackSeconds.protoUint32ToLong().toInt())
         }
         val isPlayingFromStatus = resolveIsPlayingFromStatus(status)
         lastAaPlaybackIsPlaying = isPlayingFromStatus
@@ -4157,6 +4174,7 @@ class AapService : Service() {
         /** Delay before retrying USB connection after an unexpected disconnect. */
         private const val USB_RECONNECT_DELAY_MS = 3000L
         private const val RECONNECT_WAKE_LOCK_MS = 15 * 60 * 1000L
+        private const val MUSIC_BAR_ART_PX = 116
 
         /** How often the USB deferral re-asks; well inside its own budget. */
         private const val USB_DEFERRAL_RECHECK_MS = 1_000L

@@ -104,6 +104,8 @@ Sul branch `personalizzazioni`, versione `v1.2-prova1`, non proposta come aggior
 - **Barra della musica** (`aap/MusicBarView.kt`, `aap/NowPlayingState.kt`): sta nel contenuto della finestra, nello spazio liberato dal padding del `container`.
 - **Solo sopra una mappa** (`aap/MusicBarPolicy.kt`): ogni 1,5 s legge l'immagine in piccolo e cerca una colonna scura nella metà destra. La trova nella fessura dei widget e nelle app scure, non sulle mappe. Il margine passa da 0 a 80 tramite `SystemUI.apply(extraBottom)`, che poi riannuncia i margini al telefono. Funziona solo con TextureView. Prove da fermo del 2026-11-01 con la `v1.2-prova1`, DPI 218, secondo il proprietario: barra e tasti funzionano, la barra sparisce e torna passando dai widget, i widget si aprono al primo tocco, il video resta fluido e Android Auto non cade. Android Auto quindi si adatta al margine senza scollegarsi. Da provare: di notte e in viaggio. Va confermato anche il registro disconnessioni.
 
-Le versioni stabili successive dovranno avere `versionCode` maggiore di 5, altrimenti non si installano sopra la prova.
+Al buio, con la mappa di Waze in modalità notte, la barra resta sulla mappa e sparisce sui widget. La `v1.2-prova2` ridisegna la barra come la scheda di Android Auto, con copertina, colore preso dalla copertina e linea di avanzamento.
+
+Le versioni stabili successive dovranno avere `versionCode` maggiore di 6, altrimenti non si installano sopra la prova.
 
 La Action `Controlla originale` è stata provata solo nel caso "niente da fare". Il ramo che unisce e apre la Pull Request non è ancora stato eseguito.

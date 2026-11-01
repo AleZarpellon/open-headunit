@@ -97,8 +97,8 @@ android {
         applicationId = "io.github.alezarpellon.headunitcustom"
         minSdk = 16
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.2-prova1"
+        versionCode = 6
+        versionName = "1.2-prova2"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

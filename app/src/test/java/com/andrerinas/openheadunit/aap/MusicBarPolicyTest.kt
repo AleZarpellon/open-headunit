@@ -74,6 +74,35 @@ class MusicBarPolicyTest {
     }
 
     @Test
+    fun `the progress line follows the track and needs its length`() {
+        assertEquals(0.5f, MusicBarPolicy.progressFraction(30, 60))
+        assertEquals(1f, MusicBarPolicy.progressFraction(90, 60))
+        assertEquals(null, MusicBarPolicy.progressFraction(30, 0))
+    }
+
+    @Test
+    fun `a bright cover still leaves a dark card for white text`() {
+        val color = MusicBarPolicy.cardColorFor(0xFFFFFFFF.toInt())
+        assertEquals(0xFF, (color shr 24) and 0xFF)
+        assertTrue(((color shr 16) and 0xFF) <= 110)
+        assertTrue(((color shr 8) and 0xFF) <= 110)
+        assertTrue((color and 0xFF) <= 110)
+    }
+
+    @Test
+    fun `a new track resets position and picture, the same one keeps them`() {
+        NowPlayingState.clear()
+        NowPlayingState.onMetadata("Uno", "Artista", 200)
+        NowPlayingState.onPosition(50)
+        NowPlayingState.onMetadata("Uno", "Artista", 200)
+        assertEquals(50, NowPlayingState.current.value?.positionSeconds)
+        NowPlayingState.onMetadata("Due", "Artista", 100)
+        assertEquals(0, NowPlayingState.current.value?.positionSeconds)
+        assertEquals(100, NowPlayingState.current.value?.durationSeconds)
+        NowPlayingState.clear()
+    }
+
+    @Test
     fun `now playing follows the phone and clears`() {
         NowPlayingState.clear()
         NowPlayingState.onPlaying(false)
