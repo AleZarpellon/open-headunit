@@ -55,6 +55,8 @@ Si compila solo su GitHub, non serve nulla sul PC.
   2. Scrivi le note in italiano in `note-release/vX.Y.md`.
   3. Crea e invia il tag `vX.Y`. L'Action rifiuta il tag se non corrisponde a `versionName`.
 
+La Action esegue i test prima di compilare. `HctRetainedChannelTest` ("actual FSM bridge keeps its bound...") è fallito una volta e passato alla ripetizione, senza modifiche: sembra instabile. In quel caso si rilancia con `gh run rerun <id> --failed`.
+
 ## Chiave di firma
 - Sta nei GitHub Secrets: `HEADUNIT_KEYSTORE_BASE64`, `HEADUNIT_KEYSTORE_PASSWORD`, `HEADUNIT_KEY_PASSWORD`. Alias: `headunit-revived`.
 - La copia di backup la conserva il proprietario, fuori dal repository. Non va mai caricata qui.
@@ -78,7 +80,7 @@ Sulla strada verso casa del 2026-11-01 il proprietario ha notato piccole perdite
 - [x] Prova della modalità Native sulla radio con Zlink disattivato e Wi-Fi acceso a mano: Android Auto, vivavoce e musica Bluetooth funzionano. Non parte da solo.
 - [x] Avvio automatico: funziona con "Non dormire" alla prima prova (vedi sezione La radio)
 - [x] Prova alla prima accensione del giorno dopo, senza toccare nulla: Android Auto parte da solo, Zlink resta disattivato, Wi-Fi acceso, vivavoce e musica funzionano
-- [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni (codice scritto, da provare sulla radio)
+- [ ] v1.1: guardiano di riconnessione e registro delle disconnessioni (Release v1.1 pubblicata, da provare sulla radio)
 - [ ] Controllo aggiornamenti all'avvio e Pull Request settimanale dall'originale (solo versioni stabili)
 - [ ] Disattivare Zlink, solo dopo che la nostra app funziona bene
 - [ ] Fase 2: mappa di tutte le modifiche possibili
