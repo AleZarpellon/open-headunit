@@ -13,6 +13,10 @@ Dati letti dalla schermata di sistema:
 - App di proiezione preinstallata: Zlink (`com.zjinnova.zlink`), da lasciare intatta come riserva finché la nostra non funziona bene. Dopo un arresto forzato torna a collegarsi.
 - Il menu impostazioni è del produttore e non mostra quelle di Android. Nessun root né Self-ADB rilevato.
 - Test video dell'app superato: H.264 a 480p e 720p
+- Modello indicato da Android: K706. Le impostazioni di Android si aprono anche da Sistema → Di più nel menu del produttore. Il loro aspetto ("App e notifiche") fa pensare a un Android più vecchio del 14 dichiarato.
+- Menu Generale → Tempo di sonno: Non dormire, 2 ore, 1, 3 o 7 giorni (impostato: 7 giorni). Col quadro spento per 2 minuti la radio dorme e non si riavvia: Zlink resta disattivato. Zlink torna dopo un riavvio vero.
+- Nessuna voce "Batteria" nella pagina dell'app e nessuna "Ottimizzazione della batteria" in Accesso speciale alle app.
+- Al risveglio l'app non si apre da sola, nemmeno con avvio all'accensione, allo schermo acceso e via Bluetooth. Il log creato alla prova porta l'ora dell'apertura a mano: probabilmente la radio chiude l'app in standby. Indizio, non prova.
 
 ## Cosa cambia rispetto all'originale
 | Cosa | Dove | Perché |
