@@ -57,7 +57,7 @@ Si compila solo su GitHub, non serve nulla sul PC.
   2. Scrivi le note in italiano in `note-release/vX.Y.md`.
   3. Crea e invia il tag `vX.Y`. L'Action rifiuta il tag se non corrisponde a `versionName`.
 
-La Action esegue i test prima di compilare. `HctRetainedChannelTest` ("actual FSM bridge keeps its bound...") è fallito una volta e passato alla ripetizione, senza modifiche: sembra instabile. In quel caso si rilancia con `gh run rerun <id> --failed`.
+La Action esegue i test prima di compilare. `HctRetainedChannelTest` ("actual FSM bridge keeps its bound...") è fallito due volte e passato alla ripetizione, senza modifiche in quella parte: sembra instabile. Sul branch `personalizzazioni` è escluso in `app/build.gradle.kts`; sul branch stabile, finché non si uniscono, si rilancia con `gh run rerun <id> --failed`. La causa non è stata cercata.
 
 ## Come si aggiorna dall'originale
 Ogni lunedì la Action `Controlla originale` cerca l'ultima versione stabile dell'originale. Si può lanciare anche a mano da GitHub, scheda Actions. Dato che il nostro codice è già oltre la 4.0.0-beta1, la prima proposta arriverà con la 4.0.0 stabile. Il branch predefinito del repository è `riconnessione-stabile`, perché le Action programmate partono solo da quello: se si cambia branch di lavoro, va aggiornato anche `BASE_BRANCH` nella Action.
@@ -102,7 +102,7 @@ Il proprietario vuole mappa grande e Spotify come barra stretta in basso. Toccan
 
 Sul branch `personalizzazioni`, versione `v1.2-prova1`, non proposta come aggiornamento perché viene confrontata come uguale alla 1.2 ed esce come pre-release. Interruttori in Impostazioni → Audio, spenti di serie:
 - **Barra della musica** (`aap/MusicBarView.kt`, `aap/NowPlayingState.kt`): sta nel contenuto della finestra, nello spazio liberato dal padding del `container`.
-- **Solo sopra una mappa** (`aap/MusicBarPolicy.kt`): ogni 1,5 s legge l'immagine in piccolo e cerca una colonna scura nella metà destra. La trova nella fessura dei widget e nelle app scure, non sulle mappe. Il margine passa da 0 a 80 tramite `SystemUI.apply(extraBottom)`, che poi riannuncia i margini al telefono. Da provare: se Android Auto si adatta senza scollegarsi, se i tocchi restano giusti, se la lettura rallenta il video. Funziona solo con TextureView.
+- **Solo sopra una mappa** (`aap/MusicBarPolicy.kt`): ogni 1,5 s legge l'immagine in piccolo e cerca una colonna scura nella metà destra. La trova nella fessura dei widget e nelle app scure, non sulle mappe. Il margine passa da 0 a 80 tramite `SystemUI.apply(extraBottom)`, che poi riannuncia i margini al telefono. Funziona solo con TextureView. Prove da fermo del 2026-11-01 con la `v1.2-prova1`, DPI 218, secondo il proprietario: barra e tasti funzionano, la barra sparisce e torna passando dai widget, i widget si aprono al primo tocco, il video resta fluido e Android Auto non cade. Android Auto quindi si adatta al margine senza scollegarsi. Da provare: di notte e in viaggio. Va confermato anche il registro disconnessioni.
 
 Le versioni stabili successive dovranno avere `versionCode` maggiore di 5, altrimenti non si installano sopra la prova.
 
